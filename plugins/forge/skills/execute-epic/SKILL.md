@@ -8,7 +8,7 @@ type: hybrid
 
 Trigger: `/execute-epic EMB-227`, "виконай епік EMB-227", or implicit when on a feature branch with no arg (detect epic from branch name).
 
-At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `~/.claude/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to current Linear-MCP behavior — phased out in a future cleanup epic.
+At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `plugins/forge/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to current Linear-MCP behavior — phased out in a future cleanup epic.
 
 ## Core principles
 
@@ -26,7 +26,7 @@ Epic ticket ID (or `--from-branch`). Optional flags: `--parallel`, `--dry-run`, 
 
 ### 1. Load epic + sub-issues
 
-**get_ticket** for the epic (with relations). **list_subissues** for all sub-issues. In parallel: read repo `CLAUDE.md`. For each sub-issue extract `id`, `title`, `state`, `labels`, `body`. Detect mode (A / B-a / B-b / B-c / M) per `~/.claude/docs/conventions/tracker-tickets.md`. Detect executor: `exec:opus` / `exec:sonnet` (recognize old `model:opus` / `model:sonnet`). Manual-setup: `exec:manual` (recognize old `manual-setup`).
+**get_ticket** for the epic (with relations). **list_subissues** for all sub-issues. In parallel: read repo `CLAUDE.md`. For each sub-issue extract `id`, `title`, `state`, `labels`, `body`. Detect mode (A / B-a / B-b / B-c / M) per `plugins/forge/docs/conventions/tracker-tickets.md`. Detect executor: `exec:opus` / `exec:sonnet` (recognize old `model:opus` / `model:sonnet`). Manual-setup: `exec:manual` (recognize old `manual-setup`).
 
 ### 1.5. Mark epic In Progress
 

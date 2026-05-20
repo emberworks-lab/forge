@@ -24,13 +24,13 @@ Then branch:
 
 ### `linear`
 
-Read `~/.claude/docs/tracker-backends/linear.md`, find the `## setup_interview` section, and execute it step-by-step. That recipe asks which team, which project (optional), and auto-detects the prefix — then writes `tracker.json`.
+Read `plugins/forge/docs/tracker-backends/linear.md`, find the `## setup_interview` section, and execute it step-by-step. That recipe asks which team, which project (optional), and auto-detects the prefix — then writes `tracker.json`.
 
 After `setup_interview` writes `tracker.json`, call `ensure_labels` via the linear recipe to create all required labels (idempotent).
 
 ### `github`
 
-Read `~/.claude/docs/tracker-backends/github.md`, find the `## setup_interview` section, and execute it step-by-step. That recipe auto-detects org / repo and asks about a new vs existing GitHub Project — then writes `tracker.json`.
+Read `plugins/forge/docs/tracker-backends/github.md`, find the `## setup_interview` section, and execute it step-by-step. That recipe auto-detects org / repo and asks about a new vs existing GitHub Project — then writes `tracker.json`.
 
 After `setup_interview` writes `tracker.json`, call `ensure_labels` via the github recipe to create all required labels (idempotent).
 

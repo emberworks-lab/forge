@@ -23,10 +23,11 @@ Context:
 - Branch: you're already on <branch-name>; do not create a new branch
 
 Globals to consult as needed:
-- ~/.claude/docs/conventions/tracker-tickets.md
-- ~/.claude/docs/conventions/git-workflow.md
-- ~/.claude/docs/testing/00_general.md + the platform-specific testing doc
-- ~/.claude/docs/linting/00_general.md + the platform-specific linting doc
+- plugins/forge/docs/conventions/tracker-tickets.md
+- plugins/forge/docs/conventions/git-workflow.md
+- plugins/forge/docs/testing/00_general.md + the platform-specific testing doc
+<!-- TODO: linting docs not migrated, deleted in EPIC E -->
+- (linting docs not available; use project CLAUDE.md linter commands instead)
 
 You MUST:
 - Run linter via linter-runner agent (mode=fix)

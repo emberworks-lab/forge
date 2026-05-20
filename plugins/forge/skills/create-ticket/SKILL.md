@@ -8,7 +8,7 @@ type: hybrid
 
 Trigger when the user says "create a ticket", "давай створимо тікет", `/create-ticket`, or passes a brief inline. Also invoked indirectly by `forge:create-epic` for each sub-issue.
 
-At every tracker-touching step: read `<project>/.claude/tracker.json` to resolve `backend`, then execute the matching recipe section from `~/.claude/docs/tracker-backends/<backend>.md`. If `tracker.json` is missing, run the first-use setup flow per `forge:project-init --tracker-only`. After it writes `tracker.json`, resume here.
+At every tracker-touching step: read `<project>/.claude/tracker.json` to resolve `backend`, then execute the matching recipe section from `plugins/forge/docs/tracker-backends/<backend>.md`. If `tracker.json` is missing, run the first-use setup flow per `forge:project-init --tracker-only`. After it writes `tracker.json`, resume here.
 
 ## Core principles
 

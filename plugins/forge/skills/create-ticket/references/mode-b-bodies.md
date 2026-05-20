@@ -157,7 +157,7 @@ Final CSO-compliant `description:` line for the frontmatter.
 ## Acceptance
 - Skill file exists at `~/.claude/commands/<name>.md` (or agents path)
 - Frontmatter parses correctly (description visible in `/skill list` output, no `<!--` prefix)
-- Surfaces in `INDEX.md` under correct category after `~/.claude/scripts/generate-index.sh` run
+- Surfaces in `INDEX.md` under correct category after `plugins/forge/scripts/generate-index.sh` run
 - Manual smoke: invoke skill via trigger phrase from one of the pressure scenarios — agent follows skill body, not naïve path
 ```
 

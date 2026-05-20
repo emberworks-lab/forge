@@ -6,19 +6,19 @@ When `stack == "mobile-flutter"`, the basic `4A` copy is replaced by the **Flutt
 
 1. Run the Flutter interview.
 2. Persist answers to a temp JSON file.
-3. Invoke `~/.claude/scripts/scaffold-flutter.sh`.
+3. Invoke `plugins/forge/scripts/scaffold-flutter.sh`.
 4. After the scaffolder returns, perform post-scaffold remote setup.
 5. Print final output.
 
 ## 4A-flutter.1 — Run the Flutter interview
 
-Run the 26-question interview from `~/.claude/docs/tooling/flutter-scaffolder-interview.md` (8 phases). Each question uses `AskUserQuestion` for picks and free text for names / IDs. Skip conditional questions per the spec's "Conditional logic summary" table. Defaults are documented per question — they reflect current best practice, not the as-shipped flutter-template stack.
+Run the 26-question interview from the scaffolder spec (tooling docs not migrated — deleted in EPIC E; 8 phases). Each question uses `AskUserQuestion` for picks and free text for names / IDs. Skip conditional questions per the spec's "Conditional logic summary" table. Defaults are documented per question — they reflect current best practice, not the as-shipped flutter-template stack.
 
 Default workspace target: `~/Development/emberworks_lab_projects/<project_snake_case>/` (per the global "Pet projects default to emberworks_lab_projects/" rule). Confirm with the user before scaffolding.
 
 ## 4A-flutter.2 — Persist interview answers to JSON
 
-Write the resolved answers to a temp file using the `Q<phase>_<index>_<key>` schema from `~/.claude/scripts/_scaffold_flutter.py:ANSWER_SCHEMA`:
+Write the resolved answers to a temp file using the `Q<phase>_<index>_<key>` schema from `plugins/forge/scripts/_scaffold_flutter.py:ANSWER_SCHEMA`:
 
 ```json
 {
@@ -37,14 +37,14 @@ Write the resolved answers to a temp file using the `Q<phase>_<index>_<key>` sch
 }
 ```
 
-The optional `credentials` block (FORGE-5.4 / EMB-289) carries the per-integration three-way decision collected via Q5.3 / Q7.4 / Q7.5: `provide` (with `values`), `defer` (default if omitted — emits stubs + Mode M ticket), or `skip`. Full shape: `~/.claude/docs/tooling/flutter-scaffolder-interview.md` "Credentials JSON serialization".
+The optional `credentials` block (FORGE-5.4 / EMB-289) carries the per-integration three-way decision collected via Q5.3 / Q7.4 / Q7.5: `provide` (with `values`), `defer` (default if omitted — emits stubs + Mode M ticket), or `skip`. <!-- TODO: linting docs not migrated, deleted in EPIC E; flutter-scaffolder-interview.md Credentials JSON serialization was in tooling/ which is out of scope -->
 
 Save to `/tmp/scaffold-flutter-answers.json` (or any `mktemp -d` location).
 
 ## 4A-flutter.3 — Invoke the scaffolder
 
 ```bash
-~/.claude/scripts/scaffold-flutter.sh \
+plugins/forge/scripts/scaffold-flutter.sh \
   --answers /tmp/scaffold-flutter-answers.json \
   --target  ~/Development/emberworks_lab_projects/<project_snake_case>/ \
   [--validate]   # optional: runs `flutter pub get` + `flutter analyze` post-scaffold
@@ -53,7 +53,7 @@ Save to `/tmp/scaffold-flutter-answers.json` (or any `mktemp -d` location).
 ### What the scaffolder does
 
 - **First step (EMB-314)**: `flutter create <target> --org <bundle-id-prefix> --project-name <name_snake> --platforms=android,ios --description "<desc>"` — the Flutter SDK owns the canonical project shell (`android/`, `ios/`, `.metadata`, base `test/widget_test.dart`). All subsequent steps overlay customisations.
-- Reads `~/.claude/skill-templates/mobile-flutter/template-source.json` to find the pinned `flutter-template@v0.1.0` source.
+- Reads `plugins/forge/skill-templates/mobile-flutter/template-source.json` to find the pinned `flutter-template@v0.1.0` source.
 - Copies the template's `lib/src/**` into the new project (inline at `lib/core/` per Q1.1 default, OR as a local package at `packages/shared_core/`).
 - Rewrites `package:shared_core/...` imports to the new package name (inline layout only).
 - Drops directories for unselected features (e.g. `lib/core/network/websocket/` if Q4.5 = No, `lib/core/storage/hive/` if Q4.3 ≠ hive_ce, `keycloak_config.dart` + `auth_guard.dart` if Q5.1 = None).
@@ -63,10 +63,10 @@ Save to `/tmp/scaffold-flutter-answers.json` (or any `mktemp -d` location).
 - Generates `lib/main_<flavor>.dart` per Q8.1 environments.
 - Generates `.env.example` (committed, shape only) + `.env.<flavor>` files (gitignored). Per FORGE-5.4 (EMB-289), each integration the user selected has a per-block credentials decision (`provide` writes real values, `defer` writes workable offline stubs like `SUPABASE_URL=https://stub.supabase.co`, `skip` omits the keys).
 - Generates IDE configs: `.vscode/launch.json` and / or `.idea/runConfigurations/<Flavor>_<Mode>.xml` per Q8.2.
-- Generates `CLAUDE.md` from `~/.claude/docs/conventions/claude-md-template.md`, populated with Flutter Essential commands, Mandatory rules (`Result<T>`, `AppException`, theme tokens, `/log-decision`), Documentation inventory, stack-aware Skills section.
-- Copies stack-relevant `kit-*` skills from `~/.claude/skill-templates/mobile-flutter/` into `<project>/.claude/skills/` (filtered by Q4.3 / Q6.3 / Q6.5).
+- Generates `CLAUDE.md` from `plugins/forge/docs/conventions/claude-md-template.md`, populated with Flutter Essential commands, Mandatory rules (`Result<T>`, `AppException`, theme tokens, `/log-decision`), Documentation inventory, stack-aware Skills section.
+- Copies stack-relevant `kit-*` skills from `plugins/forge/skill-templates/mobile-flutter/` into `<project>/.claude/skills/` (filtered by Q4.3 / Q6.3 / Q6.5).
 - Generates `<project>/.claude/settings.json` with allowed Bash matching the Essential commands.
-- Copies `docs/00_meta/{decisions-log,roadmap,docs-workflow,glossary}.md` from `~/.claude/skill-templates/_common/docs/00_meta/` (resolves the docs-scaffold answer for mobile-flutter automatically).
+- Copies `docs/00_meta/{decisions-log,roadmap,docs-workflow,glossary}.md` from `plugins/forge/skill-templates/_common/docs/00_meta/` (resolves the docs-scaffold answer for mobile-flutter automatically).
 - Generates `.gitignore`.
 - Writes `.claude/scaffold-report.json` with Mode M tickets to surface to the user.
 
@@ -75,7 +75,7 @@ Save to `/tmp/scaffold-flutter-answers.json` (or any `mktemp -d` location).
 Platform shells (`android/`, `ios/`, `.metadata`) are now generated by the scaffolder itself via `flutter create` (EMB-314). No manual `flutter create` invocation is required afterwards.
 
 1. **Read** `<project>/.claude/scaffold-report.json` — pull `mode_m_tickets` and `credentials_resolution` (FORGE-5.4 / EMB-289). The latter is a flat `{integration: provide|defer|skip}` map. If the user opted into Linear automation (step 2.6 = Yes), pass `mode_m_tickets` through to the Linear flow instead of re-detecting in step 7.5.3 — the scaffolder's list is canonical because it already accounts for credential mode (`provide` → no ticket emitted).
-2. **Skip step 4C** — the scaffolder already produced `.claude/skills/`. SKILLS.md generation can still run as a follow-up if `~/.claude/scripts/generate-project-skills.sh` is available; otherwise add a TODO note to the chat output.
+2. **Skip step 4C** — the scaffolder already produced `.claude/skills/`. SKILLS.md generation can still run as a follow-up if `plugins/forge/scripts/generate-project-skills.sh` is available; otherwise add a TODO note to the chat output.
 3. **Skip step 5** (Generate CLAUDE.md) — the scaffolder produced it.
 4. **Skip step 6** (Initialize docs/00_meta/) — the scaffolder already copied it.
 5. **Skip step 7** (settings.json) — the scaffolder produced it.
@@ -97,7 +97,7 @@ git commit -m "Initial commit: Flutter scaffold via /project-init" \
   -m "Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 ```
 
-Use the Co-Authored-By footer matching the model that ran the scaffolder; see `~/.claude/docs/conventions/git-workflow.md`.
+Use the Co-Authored-By footer matching the model that ran the scaffolder; see `plugins/forge/docs/conventions/git-workflow.md`.
 
 ### 4A-flutter.5.2 — Ask about GitHub repo
 

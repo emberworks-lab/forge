@@ -4,7 +4,7 @@ Runs only if step 2.6 was **Yes (Recommended)**. If **No** or **Skip**, jump str
 
 ## Hard rules
 
-Inherited from FORGE-3.5 (see `~/.claude/docs/conventions/tracker-tickets.md`):
+Inherited from FORGE-3.5 (see `plugins/forge/docs/conventions/tracker-tickets.md`):
 
 - **NEVER create a Linear team.** Always work within an existing team. If `list_teams` returns zero teams, exit gracefully: "No Linear teams found. Create one manually in Linear, then re-run." Continue the rest of the project-init flow.
 - **NEVER set cycle or milestone** on the created project, P0 Bootstrap epic, P1 MVP epic, or any sub-issue. Cycles / milestones are strictly opt-in and the user did not opt in here.
@@ -32,7 +32,7 @@ Capture `project.id`, `project.url`, and `project.slug` (or equivalent) from the
 
 ## 7.5.3. Detect credentials needs
 
-Scan the answers from step 2 (Persistence + Cloud + Existing scaffolding). For each match, queue one Mode M sub-ticket; the body comes from the matching template under `~/.claude/skill-templates/_common/manual-setup-templates/`:
+Scan the answers from step 2 (Persistence + Cloud + Existing scaffolding). For each match, queue one Mode M sub-ticket; the body comes from the matching template under `plugins/forge/skill-templates/_common/manual-setup-templates/`:
 
 | Detected during interview | Template file | Sub-ticket title |
 |---|---|---|
@@ -73,7 +73,7 @@ Capture the epic ID.
 
 For each entry from 7.5.3:
 
-1. Read the template at `~/.claude/skill-templates/_common/manual-setup-templates/<service>.md`.
+1. Read the template at `plugins/forge/skill-templates/_common/manual-setup-templates/<service>.md`.
 2. Substitute placeholders: `<project_name>`, `<date>`.
 3. Call `mcp__claude_ai_Linear__save_issue` with:
    - `team` = chosen team ID.

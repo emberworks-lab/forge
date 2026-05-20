@@ -28,7 +28,7 @@ When step 4A would copy templates from a remote source: skip the `/install-flutt
 
 ## Stack is exotic / not covered by templates
 
-Interview-scaffold via step 4B. Warn the user that some `~/.claude/docs/testing/<platform>.md` / `~/.claude/docs/linting/<platform>.md` references in CLAUDE.md may not exist yet. The user can either create those docs or remove the references.
+Interview-scaffold via step 4B. Warn the user that some `plugins/forge/docs/testing/<platform>.md` references in CLAUDE.md may not exist yet. The user can either create those docs or remove the references. <!-- TODO: linting docs not migrated, deleted in EPIC E -->
 
 ## User refuses interview-scaffold for a new stack
 

@@ -8,7 +8,7 @@ type: hybrid
 
 Finalize a completed epic. Tests-pass hard gate first, then the user picks one of three paths (merge / PR / cleanup), and the skill executes that path with shared follow-ups (simplify, docs, DRY comment).
 
-At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `~/.claude/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to legacy Linear-MCP behavior — phased out in a future cleanup epic.
+At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `plugins/forge/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to legacy Linear-MCP behavior — phased out in a future cleanup epic.
 
 ## Trigger & epic detection
 

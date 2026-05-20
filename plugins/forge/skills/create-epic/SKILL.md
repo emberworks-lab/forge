@@ -8,7 +8,7 @@ type: hybrid
 
 Trigger when the user says "let's create an epic", "давай створимо епік", `/create-epic`, or passes a description inline.
 
-At every tracker-touching step: read `<project>/.claude/tracker.json` to resolve `backend`, then execute the matching recipe section from `~/.claude/docs/tracker-backends/<backend>.md`. If `tracker.json` is missing, run the first-use setup flow per `forge:project-init --tracker-only`. After it writes `tracker.json`, resume here.
+At every tracker-touching step: read `<project>/.claude/tracker.json` to resolve `backend`, then execute the matching recipe section from `plugins/forge/docs/tracker-backends/<backend>.md`. If `tracker.json` is missing, run the first-use setup flow per `forge:project-init --tracker-only`. After it writes `tracker.json`, resume here.
 
 For GitHub backend, run multi-repo detection once — see `references/multi-repo-detection.md`.
 

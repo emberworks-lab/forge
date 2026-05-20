@@ -8,7 +8,7 @@ type: hybrid
 
 Trigger: `/pr-create EMB-227`, "створи пр на епік EMB-227", or invoked from `forge:epic-close` after the user opts in.
 
-At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `~/.claude/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to current Linear-MCP behavior — phased out in a future cleanup epic.
+At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `plugins/forge/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to current Linear-MCP behavior — phased out in a future cleanup epic.
 
 ## Core principles
 

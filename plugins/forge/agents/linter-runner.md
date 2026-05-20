@@ -100,7 +100,7 @@ Fix-mode final report includes: `auto_fixed`, `manually_fixed`, `still_failing`,
 
 ## Stack-specific parsing notes
 
-See `~/.claude/docs/linting/` for per-platform details.
+<!-- TODO: linting docs not migrated, deleted in EPIC E --> See project CLAUDE.md for platform linting commands.
 
 - **Flutter analyze** — `severity • message • file:line:col • rule` or `--machine` line-delimited
 - **ESLint JSON** — `messages[]` with `severity` (1=warn, 2=error), `ruleId`, `line`, `column`

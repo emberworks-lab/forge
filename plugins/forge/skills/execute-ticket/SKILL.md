@@ -8,7 +8,7 @@ type: hybrid
 
 Trigger: `/execute-ticket EMB-228`, "виконай тікет EMB-228", or invoked from `forge:execute-epic` per sub-issue.
 
-At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `~/.claude/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to current Linear-MCP behavior — phased out in a future cleanup epic.
+At every tracker-touching step: read `<project>/.claude/tracker.json` → `backend`; execute the matching recipe section from `plugins/forge/docs/tracker-backends/<backend>.md`. Fallback: if `tracker.json` is missing, fall back to current Linear-MCP behavior — phased out in a future cleanup epic.
 
 ## Core principles
 
@@ -32,7 +32,7 @@ For FORGE config-only tickets (target `~/.claude/`), the "code/exact paths" chec
 
 ### 1. Load ticket + project context
 
-In parallel: **get_ticket via backend recipe**; read repo `CLAUDE.md`; read `~/.claude/docs/conventions/tracker-tickets.md` if body shape is unclear.
+In parallel: **get_ticket via backend recipe**; read repo `CLAUDE.md`; read `plugins/forge/docs/conventions/tracker-tickets.md` if body shape is unclear.
 
 ### 1.5. Mark ticket In Progress
 
@@ -90,7 +90,7 @@ Invoke `forge:verification-before-completion`. Iron Law: NO COMPLETION CLAIMS WI
 
 ### 11. Commit (if `--commit`)
 
-Default NO COMMIT when standalone. When invoked from `forge:execute-epic` (`--commit` implied): stage + commit. **commit_close_phrase via backend recipe** with `kind=implements`. Message: `<phrase>: <ticket title lowercase>` then `Co-Authored-By: <model footer per ~/.claude/docs/conventions/git-workflow.md>`. Push the branch (first push of a new branch needs `--set-upstream`): `git push -u origin "$(git rev-parse --abbrev-ref HEAD)" 2>&1 | tail -1`. If push fails, warn and continue.
+Default NO COMMIT when standalone. When invoked from `forge:execute-epic` (`--commit` implied): stage + commit. **commit_close_phrase via backend recipe** with `kind=implements`. Message: `<phrase>: <ticket title lowercase>` then `Co-Authored-By: <model footer per plugins/forge/docs/conventions/git-workflow.md>`. Push the branch (first push of a new branch needs `--set-upstream`): `git push -u origin "$(git rev-parse --abbrev-ref HEAD)" 2>&1 | tail -1`. If push fails, warn and continue.
 
 ### 11.5. Mark ticket Done
 

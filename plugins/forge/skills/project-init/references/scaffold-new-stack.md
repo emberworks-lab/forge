@@ -1,6 +1,6 @@
 # Interview-scaffold a new stack (step 4B)
 
-Used when the resolved `~/.claude/skill-templates/<stack>/` folder is empty (or only has a placeholder README).
+Used when the resolved `plugins/forge/skill-templates/<stack>/` folder is empty (or only has a placeholder README).
 
 ## Open the offer
 
@@ -17,7 +17,7 @@ For each "common" kit-skill (the list varies by stack — see the per-stack inte
 1. Ask the user: "How do you typically scaffold a new `<feature / route / table / module>` in this kind of project? Walk me through the files you'd touch."
 2. Compose a `SKILL.md` from the answers (use the writing-skill rules — `type: hybrid` unless the skill is genuinely one-shot).
 3. Save the result to **two** places:
-   - `~/.claude/skill-templates/<stack>/<kit-name>.md` — for future reuse.
+   - `plugins/forge/skill-templates/<stack>/<kit-name>.md` — for future reuse.
    - `<project>/.claude/skills/<kit-name>.md` — for the current project.
 
 ## Stack-specific kit-* hint lists

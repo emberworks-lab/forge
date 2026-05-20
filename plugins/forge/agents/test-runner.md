@@ -114,7 +114,7 @@ Fix-mode final report includes: `iterations_used`, `fixed`, `still_failing`, `fi
 
 ## Stack-specific parsing notes
 
-See `~/.claude/docs/testing/` for per-platform details.
+See `plugins/forge/docs/testing/` for per-platform details.
 
 - **Flutter `--machine`** — JSON events: `testStart`, `testDone`, `error`, `done`; `testDone.result` is `success`/`failure`/`error`
 - **Vitest JSON** — `testResults[].assertionResults[]` with `status: failed` and `failureMessages[]`

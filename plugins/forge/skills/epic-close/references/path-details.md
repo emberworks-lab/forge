@@ -12,7 +12,7 @@ Full step-by-step for each path in Step 2 of `forge:epic-close`.
 
    Only `y` permits merge. Anything else → exit, leave branch as-is.
 
-4. **Squash + merge** per `~/.claude/docs/conventions/git-workflow.md` — typically:
+4. **Squash + merge** per `plugins/forge/docs/conventions/git-workflow.md` — typically:
 
    ```
    git checkout <base>

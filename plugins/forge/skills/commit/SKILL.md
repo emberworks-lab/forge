@@ -15,7 +15,7 @@ Create a git commit whose subject auto-links to a tracker ticket via the backend
 - **One commit per ticket.** Magic word in subject → tracker auto-closes on PR merge to default.
 - **Backend dispatches phrase shape.** Never hardcode `EMB-` or `#N` — read `tracker.json` once, then ask the backend recipe.
 - **Stage explicitly.** Never `git add -A` blindly; skip anything that smells like a secret.
-- **Co-author footer matches the running model.** Per `~/.claude/docs/conventions/git-workflow.md`.
+- **Co-author footer matches the running model.** Per `plugins/forge/docs/conventions/git-workflow.md`.
 
 ## Dispatch — read tracker.json once
 
@@ -79,7 +79,7 @@ If unclear, ask. Rubric notes + per-backend mappings: see `references/magic-word
 
 ### 5. Compose the commit message via backend recipe
 
-**If `tracker.json` is present:** read `~/.claude/docs/tracker-backends/<backend>.md`, locate `## commit_close_phrase`, apply it with the chosen `ref` and `kind`. The recipe returns the magic-word phrase string.
+**If `tracker.json` is present:** read `plugins/forge/docs/tracker-backends/<backend>.md`, locate `## commit_close_phrase`, apply it with the chosen `ref` and `kind`. The recipe returns the magic-word phrase string.
 
 **Legacy fallback** (no `tracker.json`): build the phrase directly with the detected prefix — `Implements <PREFIX>-<N>` / `Fixes <PREFIX>-<N>` / `Refs <PREFIX>-<N>`.
 
@@ -99,7 +99,7 @@ Examples + per-backend phrase table: see `references/magic-words.md`.
 
 ### 6. Stage files and commit
 
-Stage relevant files by path (never `git add -A`). Refuse anything that looks like a secret (`.env`, credentials, keys). Create the commit with the composed subject and the co-author footer matching the running model (per `~/.claude/docs/conventions/git-workflow.md`, format `Co-Authored-By: <Model name> <noreply@anthropic.com>`). Run `git status` after to verify.
+Stage relevant files by path (never `git add -A`). Refuse anything that looks like a secret (`.env`, credentials, keys). Create the commit with the composed subject and the co-author footer matching the running model (per `plugins/forge/docs/conventions/git-workflow.md`, format `Co-Authored-By: <Model name> <noreply@anthropic.com>`). Run `git status` after to verify.
 
 ## Do NOT
 

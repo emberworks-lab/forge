@@ -1,6 +1,6 @@
 ---
 name: project-init
-description: Bootstrap a new project's Claude Code setup — stack interview, CLAUDE.md from template, kit-* skills copied from `~/.claude/skill-templates/<stack>/`, settings.json, tracker, optional Linear project. `--tracker-only` re-runs only the tracker setup on an existing project.
+description: Bootstrap a new project's Claude Code setup — stack interview, CLAUDE.md from template, kit-* skills copied from `plugins/forge/skill-templates/<stack>/`, settings.json, tracker, optional Linear project. `--tracker-only` re-runs only the tracker setup on an existing project.
 type: fundamental
 ---
 
@@ -11,16 +11,16 @@ Interactive bootstrap for a fresh (or freshly-claudified) project. Triggers: `/p
 ## Core principles
 
 - **Interactive, not magical.** Ask about the stack; don't infer from `package.json` alone — wrong guesses are expensive to undo.
-- **Reuse global infrastructure.** CLAUDE.md references `~/.claude/docs/`; the project setup is intentionally not self-sufficient.
-- **Self-improving.** When a stack has no templates yet, interview the user and save the result to `~/.claude/skill-templates/<stack>/` for future projects.
+- **Reuse global infrastructure.** CLAUDE.md references `plugins/forge/docs/`; the project setup is intentionally not self-sufficient.
+- **Self-improving.** When a stack has no templates yet, interview the user and save the result to `plugins/forge/skill-templates/<stack>/` for future projects.
 - **Idempotent re-runs.** If artifacts exist, ask "overwrite / merge / abort" before touching them.
 
 ## Contract
 
 When the flow completes (full mode), the project has:
 
-1. `CLAUDE.md` — generated from `~/.claude/docs/conventions/claude-md-template.md`, populated for the chosen stack.
-2. `.claude/skills/` — `kit-*` templates copied from `~/.claude/skill-templates/<stack>/`.
+1. `CLAUDE.md` — generated from `plugins/forge/docs/conventions/claude-md-template.md`, populated for the chosen stack.
+2. `.claude/skills/` — `kit-*` templates copied from `plugins/forge/skill-templates/<stack>/`.
 3. `.claude/settings.json` — allowed Bash list + stack-appropriate defaults.
 4. `.claude/tracker.json` — backend declared (linear / github / markdown / skip).
 5. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
@@ -51,11 +51,11 @@ Ask: "Scaffold `docs/00_meta/`? (decisions-log + roadmap + docs-workflow + gloss
 
 Ask: "Create a Linear project for backlog tracking?" Options: **Yes (Recommended)** / **No** / **Skip — I'll add later**. Record; apply in step 7.5.
 
-Inherited hard rules (see `~/.claude/docs/conventions/tracker-tickets.md`): never offer team creation; never propose cycles or milestones by default; never set priority.
+Inherited hard rules (see `plugins/forge/docs/conventions/tracker-tickets.md`): never offer team creation; never propose cycles or milestones by default; never set priority.
 
 ### 3. Resolve template path
 
-Map `(project_type, framework)` → `~/.claude/skill-templates/<stack>/` via the table in `references/skill-templates-routing.md`. Check whether the resolved folder exists and contains real `kit-*.md` files.
+Map `(project_type, framework)` → `plugins/forge/skill-templates/<stack>/` via the table in `references/skill-templates-routing.md`. Check whether the resolved folder exists and contains real `kit-*.md` files.
 
 ### 4A. Templates exist — copy them (non-Flutter)
 
@@ -63,25 +63,25 @@ For stacks **other than `mobile-flutter`**, follow `references/copy-templates.md
 
 ### 4A-flutter. Stack = mobile-flutter — run the scaffolder
 
-The Flutter path replaces the basic copy with the **Flutter scaffolder pipeline** (interview → JSON → `~/.claude/scripts/scaffold-flutter.sh` → post-scaffold remote setup). The scaffolder owns CLAUDE.md, `.claude/skills/`, `.claude/settings.json`, `docs/00_meta/`, git init, GitHub repo, and the hand-off to step 7.5.
+The Flutter path replaces the basic copy with the **Flutter scaffolder pipeline** (interview → JSON → `plugins/forge/scripts/scaffold-flutter.sh` → post-scaffold remote setup). The scaffolder owns CLAUDE.md, `.claude/skills/`, `.claude/settings.json`, `docs/00_meta/`, git init, GitHub repo, and the hand-off to step 7.5.
 
 Full pipeline: `references/flutter-scaffolder.md`. If this branch runs, steps 4C / 5 / 6 / 7 are **skipped** (the scaffolder produced them); jump to step 7.25.
 
 ### 4B. Templates do not exist — interview-scaffold
 
-Per `references/scaffold-new-stack.md`: ask the user to walk through their typical workflow for `kit-create-feature`, `kit-add-route` (or equivalent), compose SKILL.md files from the answers, save to `~/.claude/skill-templates/<stack>/` for future reuse, and also drop a copy in `<project>/.claude/skills/`.
+Per `references/scaffold-new-stack.md`: ask the user to walk through their typical workflow for `kit-create-feature`, `kit-add-route` (or equivalent), compose SKILL.md files from the answers, save to `plugins/forge/skill-templates/<stack>/` for future reuse, and also drop a copy in `<project>/.claude/skills/`.
 
 ### 4C. Generate per-project SKILLS.md
 
-Run `~/.claude/scripts/generate-project-skills.sh <stack> <project>/.claude/SKILLS.md` to emit a stack-filtered skills index. Add one pointer line to CLAUDE.md `## Skills`: "See `.claude/SKILLS.md` for the auto-generated, stack-filtered list."
+Run `plugins/forge/scripts/generate-project-skills.sh <stack> <project>/.claude/SKILLS.md` to emit a stack-filtered skills index. Add one pointer line to CLAUDE.md `## Skills`: "See `.claude/SKILLS.md` for the auto-generated, stack-filtered list."
 
 ### 5. Generate CLAUDE.md
 
-Read `~/.claude/docs/conventions/claude-md-template.md` and substitute placeholders per `references/claude-md-scaffold.md` (project name, tagline, stack, Essential commands, Architecture, Mandatory rules, Documentation inventory, Linear workflow, Global references, Skills).
+Read `plugins/forge/docs/conventions/claude-md-template.md` and substitute placeholders per `references/claude-md-scaffold.md` (project name, tagline, stack, Essential commands, Architecture, Mandatory rules, Documentation inventory, Linear workflow, Global references, Skills).
 
 ### 6. Initialize project docs structure
 
-If step 2.5 answer was **Yes**, copy `~/.claude/skill-templates/_common/docs/00_meta/{decisions-log,roadmap,docs-workflow,glossary}.md` into `<project>/docs/00_meta/`, substitute `<date>` / `<project_name>`, and inject the **Documentation inventory** table + the `/log-decision` row into CLAUDE.md. Full substitution spec: `references/docs-scaffold.md`.
+If step 2.5 answer was **Yes**, copy `plugins/forge/skill-templates/_common/docs/00_meta/{decisions-log,roadmap,docs-workflow,glossary}.md` into `<project>/docs/00_meta/`, substitute `<date>` / `<project_name>`, and inject the **Documentation inventory** table + the `/log-decision` row into CLAUDE.md. Full substitution spec: `references/docs-scaffold.md`.
 
 ### 7. Settings.json defaults
 
@@ -107,7 +107,7 @@ Print the summary block from `references/output-summary.md` — what was created
 - Do not assume stack from filenames alone; ask.
 - Do not run `git init` unless the user explicitly asked (the Flutter scaffolder branch is the only exception, and it's gated).
 - Do not auto-install dependencies; that is the user's environmental commitment.
-- Do not modify `~/.claude/docs/` or `~/.claude/commands/` during init. This skill writes to `~/.claude/skill-templates/<stack>/` only with consent in step 4B.
+- Do not modify `plugins/forge/docs/` or `plugins/forge/skills/` during init. This skill writes to `plugins/forge/skill-templates/<stack>/` only with consent in step 4B.
 - Do not create a Linear team. Always work within an existing one (FORGE-3.5).
 - Do not set cycle, milestone, priority, dueDate, estimate, or assignee on any Linear project / epic / sub-issue.
 
@@ -118,5 +118,5 @@ Print the summary block from `references/output-summary.md` — what was created
 ## What this skill does not cover
 
 - **Per-stack interview question lists** — see `references/stack-interviews/<stack>.md`.
-- **The Flutter scaffolder script itself** — owned by `~/.claude/scripts/scaffold-flutter.sh`; this skill drives the user-facing flow only.
+- **The Flutter scaffolder script itself** — owned by `plugins/forge/scripts/scaffold-flutter.sh`; this skill drives the user-facing flow only.
 - **Existing-project audit** — that is `/claude-md-management:claude-md-improver`.

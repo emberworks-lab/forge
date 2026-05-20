@@ -21,7 +21,7 @@ Before running the create-epic flow, peek at the resolved `tracker.json`:
   - `no` → continue with epic in current `$REPO`. Do not re-ask in future invocations (absence of `epics_repo` is the answer).
   - `use existing repo: <name>` → verify the repo is in the project's linked list; write `epics_repo`.
 
-See `~/.claude/docs/tracker-backends/README.md` §3.3 and `~/.claude/docs/tracker-backends/github.md` `## setup_interview` step 4 for the canonical flow.
+See `plugins/forge/docs/tracker-backends/README.md` §3.3 and `plugins/forge/docs/tracker-backends/github.md` `## setup_interview` step 4 for the canonical flow.
 
 ## Multi-repo area routing
 

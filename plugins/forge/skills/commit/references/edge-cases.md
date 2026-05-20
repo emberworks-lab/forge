@@ -33,7 +33,7 @@ If the file exists but doesn't parse, halt with the parse error and tell the use
 
 ## Backend recipe missing
 
-If `~/.claude/docs/tracker-backends/<backend>.md` is missing or lacks the `## commit_close_phrase` section, halt with: "Backend recipe for `<backend>` not found at `<expected path>`. Migrate `tracker.json` to a supported backend or delete it to fall back to the legacy Linear path."
+If `plugins/forge/docs/tracker-backends/<backend>.md` is missing or lacks the `## commit_close_phrase` section, halt with: "Backend recipe for `<backend>` not found at `<expected path>`. Migrate `tracker.json` to a supported backend or delete it to fall back to the legacy Linear path."
 
 ## Pre-commit hook fails
 

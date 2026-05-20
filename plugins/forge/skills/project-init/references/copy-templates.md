@@ -1,6 +1,6 @@
 # Copy templates flow (step 4A, non-Flutter stacks)
 
-Used when the resolved `~/.claude/skill-templates/<stack>/` folder exists and has real `kit-*.md` files. Flutter has its own path (see `references/flutter-scaffolder.md`).
+Used when the resolved `plugins/forge/skill-templates/<stack>/` folder exists and has real `kit-*.md` files. Flutter has its own path (see `references/flutter-scaffolder.md`).
 
 ## Steps
 

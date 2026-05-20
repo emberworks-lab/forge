@@ -1,6 +1,6 @@
 # mobile-flutter interview
 
-The Flutter path runs the 26-question scaffolder interview (`~/.claude/docs/tooling/flutter-scaffolder-interview.md`, 8 phases) rather than this short list. Use this file as a reference for the dimensions that interview covers; the actual question text lives upstream so it can evolve without re-shipping this skill.
+The Flutter path runs the 26-question scaffolder interview (tooling docs not migrated — deleted in EPIC E, 8 phases) rather than this short list. Use this file as a reference for the dimensions that interview covers; the actual question text lives in the scaffolder script.
 
 ## Dimensions covered
 
@@ -29,4 +29,4 @@ Bloc + go_router + Drift + Supabase + Keycloak auth + `get_it` + `very_good_anal
 ## See also
 
 - `references/flutter-scaffolder.md` — the full pipeline orchestration.
-- `~/.claude/docs/tooling/flutter-scaffolder-interview.md` — canonical question text.
+<!-- TODO: linting docs not migrated, deleted in EPIC E; flutter-scaffolder-interview.md was in tooling/ which is out of scope -->

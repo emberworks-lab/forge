@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/template-source",
+  "description": "Pin file for the Flutter scaffolder. Read by ~/.claude/scripts/scaffold-flutter.sh to locate and verify the base flutter-template source. Bump this when a newer flutter-template tag is published and validated.",
+  "template": {
+    "name": "flutter-template",
+    "repo": "https://github.com/emberworks-lab/flutter-template",
+    "tag": "v0.1.0",
+    "sha": "f5182a4e4e9e0f61395362da26f60bb5bef3d342",
+    "local_mirror": "~/Development/emberworks_lab_projects/flutter-template",
+    "fetch_strategy": "prefer-local-mirror"
+  },
+  "scaffolder": {
+    "version": "1.0.0",
+    "min_python": "3.10",
+    "entry": "~/.claude/scripts/scaffold-flutter.sh"
+  },
+  "history": [
+    {
+      "version": "1.0.0",
+      "tag": "v0.1.0",
+      "date": "2026-05-09",
+      "ticket": "EMB-288",
+      "notes": "Initial pin. Created during FORGE-5.3 (generator implementation)."
+    }
+  ]
+}
