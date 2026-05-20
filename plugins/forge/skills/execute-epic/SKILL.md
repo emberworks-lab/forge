@@ -44,6 +44,13 @@ Resolve `feature/<prefix>-<epic_number>-<slug>` (slug = lowercased+hyphenated ep
 
 Once, in the main session (NOT a subagent), invoke `forge:e2e`'s setup-check. `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. This gate runs **once per epic**. Per-sub-issue `forge:execute-ticket` subagents MUST NOT re-run it.
 
+### 3.6. Graph refresh (preflight)
+
+Once, in the main session (NOT a subagent), invoke `forge:graph-refresh` (incremental). This ensures the code-review graph is fresh before the dispatch loop starts.
+
+- Graceful skip if `code-review-graph` is not installed or no `.mcp.json` exists — the underlying skill handles this automatically.
+- This step runs **once per epic**. Per-sub-issue `forge:execute-ticket` subagents MUST NOT re-run `forge:graph-refresh`.
+
 ### 4. Build execution plan
 
 Topological sort by `## Depends on` blocks and `blockedBy` relations. Identify parallel groups via file-scope heuristics from `## What` / `## Steps` / `## Files`. When in doubt → sequential. **Parallel safety checklist** REQUIRED if `--parallel` — see `references/parallel-safety.md`. Print the plan compactly (see `references/output-formats.md` for exact shape). Ask "ОК, поїхали? або щось правимо?". If `--dry-run`, stop here.
@@ -80,6 +87,7 @@ Print the final summary to chat per `references/output-formats.md`.
 - Auto-fix integration failures in step 6.
 - Skip the manual-setup gate if any such tickets are open.
 - Parallelize without `--parallel`. Sequential by default.
+- Have subagents re-run `forge:graph-refresh` — Step 3.6 already handled it once at the start of the epic.
 
 ## Edge cases + resumability
 
