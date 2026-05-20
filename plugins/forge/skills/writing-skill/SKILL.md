@@ -101,6 +101,17 @@ Steps 7-9 plus front-matter shape, dangling `references/` links, `superpowers:*`
 
 Full details: `references/slim-audit-checklist.md`.
 
+## Optional pattern — `/caveman` opt-in
+
+Independent of the five required rule-sets. A skill MAY opt in to `/caveman` ultra-compressed output mode if it produces verbose summaries and meets the policy thresholds. Opt-in is **propose-only** (user types `yes`); auto-force is reserved for skills with measured ≥40% economy + clear debuggability.
+
+Three required steps: Step 0 propose → emit `/caveman on` → emit `/caveman off` unconditionally in every exit branch. Skipping any step makes opt-in unsafe (most commonly: skill halts before the off switch, poisoning the user's next session).
+
+Forbidden: this skill itself, code-generating skills, skills producing third-party-visible output (PR bodies, public docs, ticket comments visible to reviewers).
+
+Full details: `references/caveman-opt-in-pattern.md`.
+Policy + thresholds: `../../docs/conventions/caveman-policy.md`.
+
 ## Decision tree — which type should this skill be?
 
 ```
