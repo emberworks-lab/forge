@@ -1,18 +1,18 @@
 # Path details
 
-Full step-by-step for each path in Step 2 of `forge:epic-close`.
+Full step-by-step for each path in Step 7 of `forge:epic-close`.
+
+**Note:** `forge:simplify-branch`, `forge:graph-refresh`, and `forge:review` already ran in Steps 1–3 BEFORE the user reached Step 7. The classifier-driven in-place edits from Step 6 may also have just landed. Each path below therefore picks up on a clean, simplified, reviewed branch. If Step 6 applied in-place edits, Step 0b was re-run at the end of Step 6 — paths below assume tests are green at entry.
 
 ## Path A — Merge to `<base>` now
 
-1. **Simplify** with explicit consent — see Step 3a.
-2. **Re-run tests-pass gate** (Step 0b — simplify can introduce regressions). If fails → halt.
-3. **Authorization gate** (REQUIRED before any merge command):
+1. **Authorization gate** (REQUIRED before any merge command):
 
    > "Готовий мерджити `<branch>` → `<base>`. Це незворотно з UI цієї сесії. (y / abort)"
 
    Only `y` permits merge. Anything else → exit, leave branch as-is.
 
-4. **Squash + merge** per `plugins/forge/docs/conventions/git-workflow.md` — typically:
+2. **Squash + merge** per `plugins/forge/docs/conventions/git-workflow.md` — typically:
 
    ```
    git checkout <base>
@@ -21,19 +21,17 @@ Full step-by-step for each path in Step 2 of `forge:epic-close`.
    git push
    ```
 
-   Compose the merge message from the epic title. Do NOT include a long body — the epic comment in Step 3c is the body.
+   Compose the merge message from the epic title. Do NOT include a long body — the epic comment in Step 8b is the body.
 
-5. **Verify merge succeeded** — `git log -1 <base>` shows the squash commit. Capture commit SHA for Step 4 output.
-6. Proceed to shared follow-ups (Step 3).
+3. **Verify merge succeeded** — `git log -1 <base>` shows the squash commit. Capture commit SHA for Step 9 output.
+4. Proceed to shared follow-ups (Step 8).
 
 ## Path B — Open draft PR
 
-1. **Simplify** with consent (Step 3a).
-2. **Re-run tests-pass gate** post-simplify. If fails → halt.
-3. Proceed to shared follow-ups (Step 3) — but the DRY comment + status update reference the PR URL once it exists.
-4. Invoke `forge:pr-create <EPIC-ID> --no-confirm` (manual-test confirmation already happened at Step 0c). Capture PR URL.
-5. Append the PR URL to the DRY comment posted in Step 3c (or post a follow-up comment if Step 3c already ran).
-6. **Cloud code review (post-PR).** Use the PR number from the URL printed by `forge:pr-create` (e.g. `https://github.com/.../pull/42` → PR number `42`).
+1. Proceed to shared follow-ups (Step 8) — but the DRY comment + status update reference the PR URL once it exists.
+2. Invoke `forge:pr-create <EPIC-ID> --no-confirm` (manual-test confirmation already happened at Step 0c). Capture PR URL.
+3. Append the PR URL to the DRY comment posted in Step 8b (or post a follow-up comment if Step 8b already ran).
+4. **Cloud code review (post-PR).** Use the PR number from the URL printed by `forge:pr-create` (e.g. `https://github.com/.../pull/42` → PR number `42`).
 
    > Запустити `/code-review <PR-number>` у chat input? (y / skip)
 
@@ -44,9 +42,10 @@ Full step-by-step for each path in Step 2 of `forge:epic-close`.
 
 ## Path C — Cleanup only
 
-1. **Skip simplify** — the branch is being abandoned; no point reshaping it.
-2. **Skip merge / PR.**
-3. Proceed to shared follow-ups (Step 3) with adjustments:
+1. **Skip merge / PR.**
+2. Proceed to shared follow-ups (Step 8) with adjustments:
    - DRY comment frames as "abandoned" / "deferred", not "delivered".
    - Status update (if posted) marks `health: atRisk` or `health: offTrack` and explains the pivot.
    - Docs sync still runs — stale claims about in-progress work need correction even on cleanup.
+
+Note: simplify/review ran in Steps 1–3 even for Path C. If the user knew at Step 0c they were going to cleanup-only, they should have answered `not yet` to the manual-test prompt and exited early. Once past Step 0c, Steps 1–6 run regardless of path — the cleanup framing only applies to the follow-ups.
