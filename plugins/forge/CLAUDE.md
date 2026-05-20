@@ -49,12 +49,12 @@ Two-axis review: **`forge:review`** (local, pre-PR) + **`code-review` plugin** (
 - Dispatches 3 parallel agents: **architecture-focus** (opus), **security-focus** (opus), **testing-focus** (sonnet).
 - Each agent consults a domain KB under `plugins/forge/docs/<domain>/` and the project `CLAUDE.md`.
 - Each agent returns a JSON payload (schema: `skills/review/references/output-format.md`). No file edits; no commits.
-- Wired inside `forge:epic-close` Step 3a.6 (after `forge:simplify-branch` and `forge:graph-refresh`). Combined JSON feeds the Opus classifier in `skills/epic-close/references/classifier-prompt.md`.
+- Wired inside `forge:epic-close` Step 3a.4 (after `forge:simplify-branch` and `forge:graph-refresh`). Combined JSON feeds the Opus classifier in `skills/epic-close/references/classifier-prompt.md`.
 - Can also be run standalone: `forge:review --branch`.
 
 ### Axis 2 — `code-review` plugin (Anthropic, AFTER PR)
 
-- 5 parallel Sonnet agents reviewing the GitHub PR diff; Haiku scores confidence per finding.
+- Upstream Anthropic plugin — separate from the removed forge reviewers (see Decision context below). Dispatches 5 parallel Sonnet agents on the GitHub PR diff; Haiku scores confidence per finding.
 - Posts inline comments directly on the GitHub PR.
 - Triggered by user typing `/code-review <PR#>` in the chat after `forge:pr-create` opens the PR.
 - Wired in `forge:epic-close` Path B Step 6 (`skills/epic-close/references/path-details.md`).
@@ -65,7 +65,7 @@ Two-axis review: **`forge:review`** (local, pre-PR) + **`code-review` plugin** (
 - EPIC E #30 / `plugins/forge/skills/graph-refresh/`
 - `forge:graph-refresh` is a thin wrapper around `code-review-graph build --incremental`. Safe to call anytime — idempotent.
 - Invoked at the start of `forge:execute-epic` Step 3.6 (once per epic, before the dispatch loop).
-- Invoked again inside `forge:epic-close` Step 3a.3 (before Step 3a.6 local review runs).
+- Invoked again inside `forge:epic-close` Step 3a.3 (before Step 3a.4 local review runs).
 - Initial full graph is built by `forge:project-init` Step 7.1 alongside writing `.mcp.json` directly — **NOT** via `code-review-graph install --platform claude-code` (destructive; see `docs/INSTALL.md` warning).
 - `forge:review` agents consult MCP tools (`get_review_context`, `get_impact_radius`, `detect_changes`) when `mcp_available = true`; fall back to direct file reading otherwise.
 - Installation (once per machine): `pipx install code-review-graph` — see `docs/INSTALL.md`.
@@ -78,4 +78,4 @@ Two-axis review: **`forge:review`** (local, pre-PR) + **`code-review` plugin** (
 
 ### Cross-links
 
-- `forge:epic-close` Steps 3a.3 / 3a.6 / classifier hand-off are being further redesigned by EPIC B #2 / #3 — see the GitHub issue tracker for current state. This section does not restate that plan.
+- `forge:epic-close` Steps 3a.3 / 3a.4 / classifier hand-off are being further redesigned by EPIC B #2 / #3 — see the GitHub issue tracker for current state. This section does not restate that plan.

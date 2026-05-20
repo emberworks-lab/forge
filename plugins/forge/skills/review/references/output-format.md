@@ -83,10 +83,10 @@ The orchestrator parses each agent's output with a lenient JSON parser. On parse
 
 ## Downstream — EPIC B classifier
 
-The classifier (forthcoming, issue #34) consumes the merged JSON of all three agents and produces:
+The classifier prompt is defined in `plugins/forge/skills/epic-close/references/classifier-prompt.md` (EPIC E #34). It consumes the merged JSON of all three agents and produces:
 
 - A deduped, severity-ranked actionable list.
 - Per-finding "auto-fixable?" classification.
 - Triage buckets (must-fix / nice-to-have / informational).
 
-For now, `forge:review` only prints the JSON; classification happens later in the EPIC B flow.
+Classifier invocation + user-prompt logic is wired by EPIC B #3 (see `forge:epic-close` Step 3a.4 HTML comment). `forge:review` itself only emits the JSON.

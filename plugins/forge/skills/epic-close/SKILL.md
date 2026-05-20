@@ -82,13 +82,13 @@ Full per-path step list: see [`references/path-details.md`](references/path-deta
 
 Invoke `forge:graph-refresh` inline (no user prompt — quick, idempotent, < 5s typical). The skill self-skips when `code-review-graph` is not installed or `.mcp.json` is absent; in both cases it prints a one-line skip notice and exits 0. Relay its one-line summary (e.g. `graph-refresh: 2 files updated, 41 nodes, 87 edges (3.2s)`) into the epic-close transcript so the next step has fresh graph context. Do not halt on skip.
 
-#### 3a.6. Local review (Path A, B)
+#### 3a.4. Local review (Path A, B)
 
 > "Запускаю `forge:review --branch` — повний епік-branch vs base, read-only. (y / skip / abort)"
 
 `y` → invoke `forge:review --branch`. The skill returns three reviewer-agent JSON payloads plus a combined JSON blob (schema documented in the `forge:review` skill's own output-format reference under `plugins/forge/skills/review/`). Print the per-agent summary count line (e.g. `architecture-focus: 1 high, 2 medium, 0 low`) into the transcript and keep the combined JSON for the downstream classifier. `skip` → continue without findings. `abort` → halt epic-close.
 
-<!-- forge:review output (Step 3a.6) is the input to the classifier in references/classifier-prompt.md.
+<!-- forge:review output (Step 3a.4) is the input to the classifier in references/classifier-prompt.md.
      Classifier invocation + user-prompt logic is wired by EPIC B #3 (sub-epic-from-bugs). -->
 
 #### 3a.5. Optional /ultrareview cloud audit
