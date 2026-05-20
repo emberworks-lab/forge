@@ -14,8 +14,8 @@
       "name": "forge",
       "source": "./plugins/forge",
       "strict": false,
-      "version": "0.0.1",
-      "description": "AI-driven product engineering workflows: tracker pipeline, multi-platform init, slim skill composition. Bootstrap phase — see emberworks-lab/forge#14.",
+      "version": "0.1.0",
+      "description": "AI-driven product engineering workflows: tracker pipeline, multi-platform init, slim skill composition. 26 skills, 2 agents, 6 docs domains, 4 skill-templates. See emberworks-lab/forge#14.",
       "author": {
         "name": "Anton Chontoroh",
         "email": "a.chontoroh@gmail.com"
