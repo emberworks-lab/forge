@@ -1,7 +1,7 @@
 ---
 name: epic-close
 description: Close a tracker epic via 3-option decision tree (merge / draft PR / cleanup-only). Tests-pass hard gate + simplify + docs sync + DRY comment, with the path-specific follow-ups dispatched after the user picks. Does NOT change ticket statuses or rewrite epic descriptions.
-type: hybrid
+type: fundamental
 ---
 
 # Epic Close
@@ -86,7 +86,7 @@ Invoke `forge:graph-refresh` inline (no user prompt — quick, idempotent, < 5s 
 
 > "Запускаю `forge:review --branch` — повний епік-branch vs base, read-only. (y / skip / abort)"
 
-`y` → invoke `forge:review --branch`. The skill returns three reviewer-agent JSON payloads plus a combined JSON blob (per `plugins/forge/skills/review/references/output-format.md`). Print the per-agent summary count line (e.g. `architecture-focus: 1 high, 2 medium, 0 low`) into the transcript and keep the combined JSON for the downstream classifier. `skip` → continue without findings. `abort` → halt epic-close.
+`y` → invoke `forge:review --branch`. The skill returns three reviewer-agent JSON payloads plus a combined JSON blob (schema documented in the `forge:review` skill's own output-format reference under `plugins/forge/skills/review/`). Print the per-agent summary count line (e.g. `architecture-focus: 1 high, 2 medium, 0 low`) into the transcript and keep the combined JSON for the downstream classifier. `skip` → continue without findings. `abort` → halt epic-close.
 
 <!-- forge:review output (Step 3a.6) is the input to the classifier in references/classifier-prompt.md.
      Classifier invocation + user-prompt logic is wired by EPIC B #3 (sub-epic-from-bugs). -->
