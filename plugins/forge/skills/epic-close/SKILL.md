@@ -67,7 +67,7 @@ Wait for user response. No default.
 Full per-path step list: see [`references/path-details.md`](references/path-details.md). Summary:
 
 - **Path A** (Merge): simplify → graph-refresh → review → ultrareview → re-test → authorization gate → squash+merge → shared follow-ups.
-- **Path B** (Draft PR): simplify → graph-refresh → review → ultrareview → re-test → shared follow-ups → `forge:pr-create <EPIC-ID> --no-confirm` → append PR URL.
+- **Path B** (Draft PR): simplify → graph-refresh → review → ultrareview → re-test → shared follow-ups → `forge:pr-create <EPIC-ID> --no-confirm` → append PR URL → cloud code review (post-PR, optional).
 - **Path C** (Cleanup): skip simplify + graph-refresh + review + merge/PR; shared follow-ups with "abandoned" framing.
 
 ### Step 3 — Shared follow-ups
