@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/marketplace.json",
-  "name": "emberworks-lab/forge",
+  "name": "forge",
   "owner": {
     "name": "Anton Chontoroh",
     "email": "a.chontoroh@gmail.com",
