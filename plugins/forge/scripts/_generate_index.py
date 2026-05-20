@@ -7,6 +7,46 @@ from datetime import date
 from pathlib import Path
 from collections import defaultdict
 
+# Hardcoded category map — avoids requiring category: in every SKILL.md.
+# Key: skill/agent name, Value: category label.
+CATEGORY_MAP = {
+    # tracker pipeline
+    "commit": "tracker pipeline",
+    "create-epic": "tracker pipeline",
+    "create-ticket": "tracker pipeline",
+    "execute-epic": "tracker pipeline",
+    "execute-ticket": "tracker pipeline",
+    "epic-close": "tracker pipeline",
+    "pr-create": "tracker pipeline",
+    # planning
+    "brainstorm": "planning",
+    "diagnose": "planning",
+    "grill-me": "planning",
+    "grill-with-docs": "planning",
+    "prototype": "planning",
+    "zoom-out": "planning",
+    # review
+    "handle-review-feedback": "review",
+    "simplify": "review",
+    "simplify-branch": "review",
+    # debugging
+    "diagnose-deep": "debugging",
+    "tdd": "debugging",
+    # project init + flutter
+    "dart-collect-coverage": "flutter + project init",
+    "dart-fix-runtime-errors": "flutter + project init",
+    "flutter-fix-layout-issues": "flutter + project init",
+    "project-init": "flutter + project init",
+    # meta
+    "caveman": "meta",
+    "handoff": "meta",
+    "hello": "meta",
+    "writing-skill": "meta",
+    # agents
+    "linter-runner": "runner agents",
+    "test-runner": "runner agents",
+}
+
 FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*", re.DOTALL)
 
 
@@ -51,18 +91,26 @@ def collect(dir_path: Path) -> list:
     items = []
     if not dir_path.exists():
         return items
-    for md in sorted(dir_path.glob("*.md")):
+    # Support both flat *.md (agents) and subdirectory */SKILL.md (skills) layouts
+    candidates = sorted(dir_path.glob("*.md")) + sorted(dir_path.glob("*/SKILL.md"))
+    seen = set()
+    for md in candidates:
+        if md in seen:
+            continue
+        seen.add(md)
         # skip README / index / docs by name
         if md.name.lower() in {"readme.md", "index.md"}:
             continue
         fm = parse_frontmatter(md.read_text())
-        if not fm.get("name"):
-            # fallback to filename
-            fm["name"] = md.stem
+        # fallback to parent dir name for SKILL.md, else stem
+        default_name = md.parent.name if md.name == "SKILL.md" else md.stem
+        name = fm.get("name", "").strip() or default_name
+        # Category: prefer frontmatter, then hardcoded map, then "uncategorized"
+        category = fm.get("category", "").strip() or CATEGORY_MAP.get(name, "uncategorized")
         items.append({
-            "name": fm.get("name", md.stem),
+            "name": name,
             "description": fm.get("description", "").strip() or "(no description)",
-            "category": fm.get("category", "uncategorized").strip(),
+            "category": category,
             "path": str(md),
         })
     return items
