@@ -62,7 +62,11 @@ Read project `CLAUDE.md > Skills`. Match the work against available `/kit-*` ski
 
 ### 6. Implement
 
-Detect ticket type and delegate. For FORGE-N config-only tickets → ad-hoc subagent pattern in `references/forge-config-fallback.md` (no TDD, no lint, no test, no commits). For standard project tickets → delegate the implementation phase to `forge:subagent-driven-development`, which dispatches **`opus`** or **`sonnet`** per-task implementer + reviewer subagents internally. Full delegation contract: see `references/implement-delegation.md`. The orchestrator stays in charge of tracker, git, and commit semantics. Architecture + editing rules apply in both modes — follow `CLAUDE.md > Mandatory rules` strictly; read each file before editing; minimal targeted changes; no "while I'm here" refactors; run codegen after schema/source change.
+Detect ticket type and delegate. For FORGE-N config-only tickets → ad-hoc subagent pattern in `references/forge-config-fallback.md` (no TDD, no lint, no test, no commits). For standard project tickets, first check Step 6.5 (e2e TDD opt-in). Then delegate the implementation phase to `forge:subagent-driven-development`, which dispatches **`opus`** or **`sonnet`** per-task implementer + reviewer subagents internally. Full delegation contract: see `references/implement-delegation.md`. The orchestrator stays in charge of tracker, git, and commit semantics. Architecture + editing rules apply in both modes — follow `CLAUDE.md > Mandatory rules` strictly; read each file before editing; minimal targeted changes; no "while I'm here" refactors; run codegen after schema/source change.
+
+### 6.5. E2E TDD loop (if ack opts in)
+
+Detect: ticket body has `## E2E coverage` with `required: yes | web | backend | mobile`. Absent / `required: no` → skip. Resolve flavor against `<project>/.claude/tracker.json` `platforms[]` (default `backend` when absent). RED phase: spawn `forge:tdd` with model **`opus`** to author e2e spec files from the ack block. Implementation (Step 6 delegate) makes them GREEN. After Step 6 returns, GREEN loop: spawn `test-runner` agent with model **`sonnet`**, `mode=report` then `mode=fix` (max 3) on the e2e spec dir. Still failing → halt; do NOT proceed to Step 7. Full contract + interaction with Step 8.5: see `references/e2e-tdd-loop.md`.
 
 ### 7. Run linter
 
@@ -106,13 +110,10 @@ Expect one of: `DONE`, `DONE_WITH_CONCERNS` (correctness → address; else note 
 
 ## Do NOT
 
-- Push commits without `--commit`. That's `forge:pr-create` or the user.
-- Change ticket status in the tracker by API. Magic-word commit + merge does it.
-- Auto-commit standalone without explicit `--commit`.
+- Commit or push without `--commit` (that's `forge:pr-create` or the user); never change ticket status via API — magic-word commit + merge does it.
 - Run the FULL test suite every time. Use `path_filter`. Full-suite is for `forge:execute-epic`'s final pass.
 - Interpret an `exec:manual` (or old `manual-setup`) ticket as executable.
-- Edit files outside the ticket's stated scope. Mention tangential issues in manual cases.
-- Invent acceptance criteria. If the ticket lacks `## Acceptance`, ask the user before proceeding.
+- Edit files outside the ticket's scope (mention tangential issues in manual cases); never invent acceptance criteria — ask if `## Acceptance` is missing.
 
 ## Edge cases + loop integration
 

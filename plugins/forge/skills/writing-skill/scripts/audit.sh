@@ -23,6 +23,9 @@
 #      file relative to SKILL.md.
 #   9. No empty sections (a '## Heading' line directly followed by another
 #      '## Heading' or by EOF, ignoring blank lines).
+#  10. Every line that indicates subagent spawning (spawn/Agent-tool/dispatch+agent/
+#      subagent_type) must name a model (sonnet|opus) inline. Prohibition lines
+#      ("do not spawn...") are exempt. Skill-tool composition is not spawning.
 #
 # Portable: POSIX bash + awk + grep + sed. No GNU-specific flags.
 
@@ -203,6 +206,125 @@ haiku_body=$(printf '%s\n' "$body" | sed -E 's/`[^`]*`/ /g')
 if printf '%s\n' "$haiku_body" | grep -Eqi '\bhaiku\b'; then
   report 7 "body mentions 'haiku' outside backticks — not used as a subagent model in this plugin"
 fi
+
+# Check 10: spawn / Agent-tool lines must name a model inline
+# Detect lines that indicate actual subagent spawning (not Skill-tool composition,
+# not prohibition "Do NOT spawn..." lines). Each such line must name 'sonnet' or 'opus'.
+#
+# Spawn-indicator patterns (case-insensitive):
+#   - "spawn" as a standalone word (not inside a prohibition or Skill-tool context)
+#   - "dispatch" + "agents" (plural) on the same line — flags fan-out dispatch headings
+#   - "Agent tool" literal phrase
+#   - "subagent_type" parameter (explicit Agent-tool usage)
+#
+# Note: "dispatch" alone (e.g. "dispatch loop", "dispatch per ticket") is NOT flagged
+#   because it is not the fan-out dispatch heading pattern. Only "dispatch...agents"
+#   (plural, separate word) triggers the check.
+#
+# Model-name detection uses the original line text (not backtick-stripped) so that
+#   **`sonnet`** and **`opus`** inside bold-backtick markup are correctly recognised.
+#
+# Exclusions:
+#   - Prohibition lines: line contains "do not", "don't", "never", "must not"
+#   - Section headings (## …) are exempted: the model must appear in the body below
+#     the heading; checking individual heading lines produces false positives when
+#     the heading names the pattern but the model is declared in the first bullet.
+v10_tmp="${TMPDIR:-/tmp}/.audit.$$.v8"
+: > "$v10_tmp"
+printf '%s\n' "$body" | awk -v out="$v10_tmp" '
+BEGIN { in_do_not = 0 }
+{
+  low = tolower($0)
+
+  # Track "## Do NOT" / "## Do not" / "## Anti-patterns" sections — prohibition context.
+  if ($0 ~ /^##[[:space:]]/) {
+    in_do_not = (low ~ /do not|do_not|don'"'"'t|anti.pattern|constraints/)
+    next
+  }
+  # Skip all other headings (# / ###) — models are declared in body paragraphs.
+  if ($0 ~ /^#/) next
+
+  # Skip everything inside a "Do NOT" section.
+  if (in_do_not) next
+
+  # Determine if this line has a spawn-indicator pattern.
+  # Note: \b word boundaries are not portable in awk ERE on macOS — use
+  # character-class anchors.
+  is_spawn = 0
+  # "spawn" preceded by a space or start-of-line (excludes "re-spawn", "respawn").
+  if (low ~ /(^|[[:space:]])spawn([[:space:]]|$)/)              is_spawn = 1
+  # "dispatch … agents" plural — fan-out dispatch heading pattern.
+  if (low ~ /dispatch[[:space:][:alnum:]_-]*[[:space:]]agents([^[:alpha:]]|$)/) is_spawn = 1
+  # Explicit Agent tool invocation.
+  if (low ~ /agent[[:space:]]+tool([^[:alpha:]]|$)/)             is_spawn = 1
+  # subagent_type parameter (direct Agent-tool call).
+  if (low ~ /subagent_type/)                                      is_spawn = 1
+
+  if (!is_spawn) next
+
+  # Exclude inline prohibition phrases on the same line.
+  if (low ~ /(do not |don'"'"'t |never |must not )/) next
+
+  # Exclude Skill-tool composition: "via (`)forge:" indicates composition.
+  # Allow for optional backtick between "via" and "forge:".
+  if (low ~ /via[[:space:]]+`?forge:/) next
+
+  # Exclude "spawn ... or" (noun use) — e.g. "sub-epic spawn or defer".
+  if (low ~ /spawn[[:space:]]+or[[:space:]]/) next
+
+  # Exclude generic architectural principle summaries: "spawn subagents for X"
+  # (plural "subagents" without a specific named agent) are descriptions of the
+  # orchestration pattern, not specific spawn declarations. The actual
+  # spawn steps with named agents are checked in the execution section.
+  if (low ~ /(^|[[:space:]])spawn[[:space:]]subagents[[:space:]]/) next
+
+  # Model-name check: use the original lowercased line (not backtick-stripped) so
+  # that **`sonnet`** / **`opus`** markup is recognised.
+  if (low ~ /(sonnet|opus)/) next
+
+  # Flag this line number for paragraph-level context check below.
+  print NR ": " $0 >> out
+}
+' 2>/dev/null
+# Post-process: for each flagged line, check if sonnet/opus appears within the same
+# *section* (bounded by ## headings) in the body. A spawn line is compliant if the
+# section it belongs to also names the model — the declaration may be a sentence or
+# paragraph earlier within the same logical section.
+if [ -s "$v10_tmp" ]; then
+  v10_filtered="${TMPDIR:-/tmp}/.audit.$$.v8f"
+  : > "$v10_filtered"
+  while IFS= read -r vline; do
+    [ -z "$vline" ] && continue
+    lineno=${vline%%:*}
+    # Find section boundaries: scan backwards for ## heading and forwards for ## heading.
+    bounds=$(printf '%s\n' "$body" | awk -v n="$lineno" '
+      BEGIN { start = 1; end = 0; total = 0 }
+      { total = NR }
+      /^##[[:space:]]/ {
+        if (NR <= n) start = NR + 1
+        if (NR > n && end == 0) end = NR - 1
+      }
+      END { print start " " (end == 0 ? total : end) }
+    ')
+    sec_start=${bounds%% *}
+    sec_end=${bounds##* }
+    sec_text=$(printf '%s\n' "$body" | awk -v s="$sec_start" -v e="$sec_end" 'NR >= s && NR <= e')
+    if printf '%s\n' "$sec_text" | grep -Eqi '(sonnet|opus)'; then
+      : # model found in section context — not a violation
+    else
+      printf '%s\n' "$vline" >> "$v10_filtered"
+    fi
+  done < "$v10_tmp"
+  if [ -s "$v10_filtered" ]; then
+    while IFS= read -r vline; do
+      [ -z "$vline" ] && continue
+      lineno=${vline%%:*}
+      report 10 "spawn/agent-dispatch line lacks model name (sonnet|opus) — line ${lineno}: ${vline#*: }"
+    done < "$v10_filtered"
+  fi
+  rm -f "$v10_filtered"
+fi
+rm -f "$v10_tmp"
 
 # Check 8: references/<file>.md links resolve
 skill_dir=$(dirname "$file")

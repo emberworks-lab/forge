@@ -57,6 +57,19 @@ Body shape with `## User actions` + `## Acceptance`: see `references/mode-m-body
 
 Show the composed body in chat (one block). Ask: "ОК, створюю? або що правимо?" If the user edits — apply, show only the delta, re-ask. Loop until "ок" / "go" / "поїхали".
 
+### 3.5 E2E injection (optional)
+
+Read `<project>/.claude/e2e.json`. If the file exists AND `opted_in: true` AND `--no-e2e` was NOT passed:
+
+Append to the ticket body (after all other sections):
+```markdown
+## E2E coverage
+required: yes
+scope: <short prose — happy path + notable edge cases, derived from title + acceptance criteria>
+```
+
+Generate `scope` inline using **sonnet** (best-effort, ≤ 15 words). Skip if `--no-e2e` is passed, `e2e.json` is absent, or `opted_in` is not `true`.
+
 ### 4. Ensure labels exist
 
 **ensure_labels via backend recipe** — no-op for markdown backend. Skip this step if invoked by `forge:create-epic` (the epic flow already called `ensure_labels` once).
