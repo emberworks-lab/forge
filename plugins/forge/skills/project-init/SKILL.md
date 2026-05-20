@@ -25,7 +25,8 @@ When the flow completes (full mode), the project has:
 4. `.claude/tracker.json` — backend declared (linear / github-personal / github-org / markdown), backend-specific fields populated per `plugins/forge/docs/conventions/tracker-json.md`.
 5. `.mcp.json` — registers code-review-graph MCP server (if `code-review-graph` CLI is on PATH).
 6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
-7. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
+7. `docs/owner-overview.md` — always; scaffolded in step 6.5 from `plugins/forge/skill-templates/_common/owner-overview.md` with project-init answers substituted.
+8. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -94,6 +95,25 @@ Read `plugins/forge/docs/conventions/claude-md-template.md` and substitute place
 ### 6. Initialize project docs structure
 
 If step 2.5 answer was **Yes**, copy `plugins/forge/skill-templates/_common/docs/00_meta/{decisions-log,roadmap,docs-workflow,glossary}.md` into `<project>/docs/00_meta/`, substitute `<date>` / `<project_name>`, and inject the **Documentation inventory** table + the `/log-decision` row into CLAUDE.md. Full substitution spec: `references/docs-scaffold.md`.
+
+### 6.5. Scaffold owner-overview.md
+
+Copy `plugins/forge/skill-templates/_common/owner-overview.md` to `<project>/docs/owner-overview.md` (single-platform) or `<repo-root>/docs/owner-overview.md` (multi-platform monorepo). Substitute `{{ placeholders }}` from interview data:
+
+| Placeholder | Source |
+|---|---|
+| `{{ project_name }}` | project name from step 2 |
+| `{{ one_paragraph_elevator_pitch }}` | elevator-pitch answer collected during the interview; if not asked, prompt now: "One-sentence elevator pitch for this project?" |
+| `{{ platform_1_name }}` / `{{ platform_2_name }}` | project type / platforms from step 2 |
+| `{{ prefix }}` / `{{ ticket_prefix }}` | from `tracker.json` `prefix` field (written in step 7.25) — substitute after step 7.25 or leave the literal placeholder if tracker step has not run yet; the next `kit-update-docs` run fills it |
+| `{{ tracker_backend }}` | from `tracker.json` `backend` field (same timing note) |
+| `{{ commit_magic_word_example }}` | derived from backend (`Refs PREFIX-N:` for Linear, `Refs #N:` for GitHub, `Refs <slug>:` for Markdown) |
+
+Sections inside `<!-- manual --> ... <!-- /manual -->` guards: replace the inner example-italics placeholder text with an empty line so the user sees a clean prompt area, but keep the guard tags themselves in place.
+
+Sections inside `<!-- auto:<key> --> ... <!-- /auto:<key> -->` guards: leave the placeholder stub lines untouched — `/forge:kit-update-docs` replaces those blocks on first epic close.
+
+Create `<project>/docs/` if it does not exist. Do not overwrite an existing `owner-overview.md` without explicit user confirmation.
 
 ### 7. Settings.json defaults
 
