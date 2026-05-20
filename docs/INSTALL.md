@@ -37,6 +37,70 @@ Run `forge:project-init` at the root of any project to scaffold `CLAUDE.md`, cop
 
 Note: `forge:project-init` is available in the plugin but the `--tracker-only` flag assumes a tracker backend is already chosen. The skill will interview you on first run.
 
+## code-review-graph MCP
+
+`code-review-graph` is an **optional** dependency that builds a persistent knowledge graph for code reviews. Skills that use it check whether the MCP is available before invoking its tools; if it is absent, they fall back to direct file reading.
+
+### Install
+
+```
+pipx install code-review-graph
+```
+
+Requires `pipx` (install via Homebrew: `brew install pipx && pipx ensurepath`).
+
+### Register with Claude Code
+
+**Do NOT run `code-review-graph install --platform claude-code`.** That command overwrites/extends `CLAUDE.md`, injects four upstream skills into `.claude/skills/`, and adds auto-update hooks to `.claude/settings.json` — all of which conflict with the forge scaffold.
+
+Instead, MCP registration is handled by `/forge:project-init` (sub-issue #33), which writes a minimal project-local `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "code-review-graph": {
+      "command": "uvx",
+      "args": ["code-review-graph", "serve"],
+      "type": "stdio"
+    }
+  }
+}
+```
+
+Restart Claude Code after `project-init` runs so the MCP server is loaded.
+
+### MCP tools provided
+
+| Tool | Purpose |
+| ---- | ------- |
+| `detect_changes` | Risk-scored analysis of a diff |
+| `get_review_context` | Token-efficient source snippets for review |
+| `get_impact_radius` | Blast-radius of a change (dependents, callers) |
+| `get_affected_flows` | Execution paths impacted by a change |
+| `query_graph` | Trace callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes` | Find functions/classes by name or keyword |
+| `get_architecture_overview` | High-level codebase structure |
+| `list_communities` | Logical modules detected by community analysis |
+
+### Build the graph
+
+`/forge:project-init` runs the initial `code-review-graph build` for a fresh project. `/forge:graph-refresh` (sub-issue #30) handles incremental updates and is wired into `/forge:execute-epic` and `/forge:epic-close`.
+
+For manual operation:
+
+```
+code-review-graph build              # full scan (initial)
+code-review-graph build --incremental # update after edits
+```
+
+### Verify
+
+Restart Claude Code after `project-init` registers the MCP. The `code-review-graph` server should appear in the MCP tool listing. Smoke-test with:
+
+```
+code-review-graph status
+```
+
 ## Troubleshooting
 
 **Plugin not visible after install**

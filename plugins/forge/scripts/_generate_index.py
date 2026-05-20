@@ -27,8 +27,10 @@ CATEGORY_MAP = {
     "zoom-out": "planning",
     # review
     "handle-review-feedback": "review",
+    "review": "review",
     "simplify": "review",
     "simplify-branch": "review",
+    "graph-refresh": "review",
     # debugging
     "diagnose-deep": "debugging",
     "tdd": "debugging",

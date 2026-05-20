@@ -23,8 +23,9 @@ When the flow completes (full mode), the project has:
 2. `.claude/skills/` — `kit-*` templates copied from `plugins/forge/skill-templates/<stack>/`.
 3. `.claude/settings.json` — allowed Bash list + stack-appropriate defaults.
 4. `.claude/tracker.json` — backend declared (linear / github / markdown / skip).
-5. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
-6. Linear project + P0/P1 epics — if step 2.6 = Yes.
+5. `.mcp.json` — registers code-review-graph MCP server (if `code-review-graph` CLI is on PATH).
+6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
+7. Linear project + P0/P1 epics — if step 2.6 = Yes.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -87,6 +88,44 @@ If step 2.5 answer was **Yes**, copy `plugins/forge/skill-templates/_common/docs
 
 Create `<project>/.claude/settings.json` per `references/settings-json.md` — allowed Bash matching the stack's essential commands, MCP servers the user named in step 2, sensible read defaults. Suggest `/update-config` for further tuning.
 
+### 7.1. Code-review-graph wiring
+
+> Skip entirely if `--tracker-only` was passed.
+
+1. **Check tool availability.** Run `command -v code-review-graph`. If the command is not found, print:
+   ```
+   code-review-graph not on PATH; skipping graph setup. Install per docs/INSTALL.md
+   ```
+   Skip the rest of this step.
+
+2. **Check existing `.mcp.json`.** If `<project>/.mcp.json` exists and is non-empty, prompt:
+   > `.mcp.json` вже існує. Що робимо? (merge / overwrite / skip)
+   - `skip` → skip the rest of this step.
+   - `merge` → ensure a `mcpServers.code-review-graph` key exists alongside any existing servers; do not remove other entries.
+   - `overwrite` → replace the file entirely with the template below.
+
+3. **Write `.mcp.json`.** Write the following 10-line template to `<project>/.mcp.json`:
+   ```json
+   {
+     "mcpServers": {
+       "code-review-graph": {
+         "command": "uvx",
+         "args": ["code-review-graph", "serve"],
+         "type": "stdio"
+       }
+     }
+   }
+   ```
+   > **WARNING: Do NOT run `code-review-graph install --platform claude-code`.** That command is destructive — it overwrites CLAUDE.md, injects upstream skills into `.claude/skills/`, and adds auto-update hooks to `.claude/settings.json` that conflict with everything this skill writes. Always write `.mcp.json` directly from the template above.
+
+4. **Run initial full build.** Execute `code-review-graph build` from the project root. This may take 30s–2min. Capture output.
+
+5. **Print summary.** Parse node/edge count from output if available. Format:
+   ```
+   graph-refresh: <N> nodes, <N> edges built
+   ```
+   Fall back to raw output if unparseable.
+
 ### 7.25. Tracker setup
 
 Run `references/tracker-setup.md`. Writes `<project>/.claude/tracker.json`. In the full flow, no overwrite-confirmation prompt (the project is being initialized fresh). If the user picks `linear`, step 7.5 reuses that team — no second team prompt.
@@ -108,6 +147,7 @@ Print the summary block from `references/output-summary.md` — what was created
 - Do not run `git init` unless the user explicitly asked (the Flutter scaffolder branch is the only exception, and it's gated).
 - Do not auto-install dependencies; that is the user's environmental commitment.
 - Do not modify `plugins/forge/docs/` or `plugins/forge/skills/` during init. This skill writes to `plugins/forge/skill-templates/<stack>/` only with consent in step 4B.
+- Do not run `code-review-graph install --platform claude-code` — it is destructive (overwrites CLAUDE.md, injects upstream skills, adds hooks). Always write `.mcp.json` directly from the template in step 7.1.
 - Do not create a Linear team. Always work within an existing one (FORGE-3.5).
 - Do not set cycle, milestone, priority, dueDate, estimate, or assignee on any Linear project / epic / sub-issue.
 
