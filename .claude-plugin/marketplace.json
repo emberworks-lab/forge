@@ -6,12 +6,29 @@
     "email": "a.chontoroh@gmail.com",
     "url": "https://github.com/emberworks-lab"
   },
+  "metadata": {
+    "description": "AI-driven product engineering workflows for Claude Code",
+    "pluginRoot": "./plugins"
+  },
   "plugins": [
     {
       "name": "forge",
-      "source": "./",
+      "source": "./plugins/forge",
+      "version": "0.0.1",
       "description": "AI-driven product engineering workflows: tracker pipeline, multi-platform init, slim skill composition. Bootstrap phase — see emberworks-lab/forge#14.",
-      "version": "0.0.1"
+      "author": {
+        "name": "Anton Chontoroh",
+        "email": "a.chontoroh@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "workflow",
+        "tracker",
+        "github-issues",
+        "epic-management",
+        "scaffolding",
+        "plugin-development"
+      ]
     }
   ]
 }
