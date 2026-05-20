@@ -22,7 +22,7 @@ When the flow completes (full mode), the project has:
 1. `CLAUDE.md` — generated from `plugins/forge/docs/conventions/claude-md-template.md`, populated for the chosen stack.
 2. `.claude/skills/` — `kit-*` templates copied from `plugins/forge/skill-templates/<stack>/`.
 3. `.claude/settings.json` — allowed Bash list + stack-appropriate defaults.
-4. `.claude/tracker.json` — backend declared (linear / github-personal / github-org / markdown), backend-specific fields populated per `plugins/forge/docs/conventions/tracker-json.md`.
+4. `.claude/tracker.json` — backend declared (linear / github-personal / github-org / markdown), backend-specific fields populated per `plugins/forge/docs/conventions/tracker-json.md`. Multi-platform projects also write `structure` (if `monorepo`) and `platforms[]`, plus a minimal child `tracker.json` per platform sub-folder.
 5. `.mcp.json` — registers code-review-graph MCP server (if `code-review-graph` CLI is on PATH).
 6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
 7. `docs/owner-overview.md` — always; scaffolded in step 6.5 from `plugins/forge/skill-templates/_common/owner-overview.md` with project-init answers substituted.
@@ -41,9 +41,18 @@ When the flow completes (full mode), the project has:
 - `pwd` to confirm root.
 - Detect existing `CLAUDE.md`, `.claude/`, `.git/`. If any exist, ask "Re-init? (overwrite / merge / abort)" before continuing.
 
-### 2. Stack interview
+### 2. Project type — single vs multi-platform
 
-Ask the seven-question batch in `references/stack-interview-common.md` (project type, framework, persistence, hosting, Linear team, design system, existing scaffolding). The selected `project_type + framework` resolves the stack key used by step 3.
+Ask first (single-select, **default: `single-platform`**):
+
+> "Project type? 1. **Single-platform** — one codebase, one stack. 2. **Multi-platform** — multiple platforms in the same repo (backend + mobile, web + backend, …)."
+
+- `single-platform` → continue to step 2.1 below.
+- `multi-platform` → jump to `references/multi-platform-interview.md` (Steps 2a–2e). It produces `structure`, `platforms[]`, and `selected_stacks[]`; on return, skip step 2.1 and continue at step 2.5. The first entry in `platforms[]` is the primary stack used wherever a single `stack key` is required (step 3 / step 4A / step 5).
+
+### 2.1. Stack interview (single-platform only)
+
+Ask the seven-question batch in `references/stack-interview-common.md` (project type, framework, persistence, hosting, Linear team, design system, existing scaffolding). The selected `project_type + framework` resolves the stack key used by step 3. Record `platforms[]` as `[{ name: "<stack key>", path: "." }]` for the tracker writer in step 7.25; `structure` stays at the default `"sub-folder"` and is **not** written to tracker.json (readers default to it).
 
 ### 2.5. Docs scaffold question
 
@@ -159,7 +168,7 @@ Create `<project>/.claude/settings.json` per `references/settings-json.md` — a
 
 ### 7.25. Tracker setup
 
-Run `references/tracker-setup.md` with the backend chosen in step 2.6. Writes `<project>/.claude/tracker.json` per the schema in `plugins/forge/docs/conventions/tracker-json.md`. In the full flow, no overwrite-confirmation prompt (the project is being initialized fresh). If the user picked `linear`, step 7.5 reuses that team — no second team prompt.
+Run `references/tracker-setup.md` with the backend chosen in step 2.6. Writes `<project>/.claude/tracker.json` per the schema in `plugins/forge/docs/conventions/tracker-json.md`. The writer also persists the multi-platform interview output (when step 2 = multi-platform): `structure` (only if `monorepo`) and `platforms[]` (always, including single-platform's `[{ name, path: "." }]`). When `platforms.length > 1`, write a minimal child `tracker.json` (`{ "backend": "<same>", "parent_path": "../" }`) into each `<path>/.claude/tracker.json`. In the full flow, no overwrite-confirmation prompt (the project is being initialized fresh). If the user picked `linear`, step 7.5 reuses that team — no second team prompt.
 
 ### 7.5. Linear automation
 
