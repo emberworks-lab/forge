@@ -81,7 +81,7 @@ Print the final summary to chat per `references/output-formats.md`.
 
 ## Do NOT
 
-- Push commits at the end. PR creation is separate.
+- Push at the orchestrator level after all tickets done. Per-ticket push during the dispatch loop is fine (and required by `execute-ticket` + the curated subagent prompt). Final PR push happens via `forge:pr-create`, not here.
 - Call `forge:epic-close` automatically. User verifies manual cases first.
 - Change tracker status of any ticket. Magic-word commits + merge handle this.
 - Auto-fix integration failures in step 6.

@@ -36,14 +36,15 @@ You MUST:
 - Generate manual test cases as a tracker comment on this ticket
 - Use commit_close_phrase via backend recipe for the commit prefix
 - Use Co-Authored-By: Claude <Model> ... footer matching your assigned model
+- Push the branch after the commit (first push: `git push -u origin "$(git rev-parse --abbrev-ref HEAD)"`). If push fails (network, auth, branch-protection), print the error and continue — do NOT halt the ticket. Per-ticket push gives visibility + resilience; auto-close still requires PR merge to default branch.
 
 You MUST NOT:
-- Push commits
 - Modify other tickets
 - Create branches
 - Change tracker ticket status manually (commits do that on merge)
 - Edit files outside this ticket's scope
 - Re-run the e2e setup gate (forge:execute-ticket Step 3.5) — the epic orchestrator already ran it once before dispatching you; skip it entirely. The opted-in e2e run step (forge:execute-ticket Step 8.5) still applies normally.
+- Push to default (`main` / `develop`) — only push the feature branch.
 
 Return final status as one of:
 - DONE — committed; <SHA>; <files changed>; <tests passed>
