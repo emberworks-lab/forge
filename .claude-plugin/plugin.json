@@ -1,9 +1,0 @@
-{
-  "name": "forge",
-  "version": "0.0.1",
-  "description": "AI-driven product engineering workflows for Claude Code. Slim, composable skills with explicit subagent model declarations. Inspired by jesse-vincent/obra-superpowers and mattpocock/skills.",
-  "author": {
-    "name": "Anton Chontoroh",
-    "email": "a.chontoroh@gmail.com"
-  }
-}
