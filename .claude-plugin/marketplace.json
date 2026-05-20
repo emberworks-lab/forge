@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/anthropics/claude-code/main/schemas/marketplace.json",
+  "name": "emberworks-lab/forge",
+  "owner": {
+    "name": "Anton Chontoroh",
+    "email": "a.chontoroh@gmail.com",
+    "url": "https://github.com/emberworks-lab"
+  },
+  "plugins": [
+    {
+      "name": "forge",
+      "source": ".",
+      "description": "AI-driven product engineering workflows: tracker pipeline, multi-platform init, slim skill composition. Bootstrap phase — see emberworks-lab/forge#14.",
+      "version": "0.0.1"
+    }
+  ]
+}
