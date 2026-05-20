@@ -66,7 +66,10 @@ Automated? **Yes** — `audit.sh` check 4.
 
 **Fail action:** Add the model name inline where the spawn happens. Remove any bare mention of `haiku`. The audit allows `` `haiku` `` inside backticks (for documenting the rule); bare text fails.
 
-Automated? **Yes** — `audit.sh` check 7.
+Automated? **Yes** — `audit.sh` checks 7 and 10.
+
+- Check 7: whole-body scan — body mentions `subagent` keyword but no `sonnet`/`opus` anywhere, or bare `haiku` outside backticks.
+- Check 10: per-line spawn scan — each line containing a spawn/Agent-tool/`dispatch…agents` pattern must name `sonnet` or `opus` in the same line or within the same `##` section. Prohibition lines ("Do NOT spawn…") and Skill-tool composition ("via `forge:X`") are exempt.
 
 ## 9. Credit attribution present
 
