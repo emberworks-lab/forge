@@ -19,14 +19,15 @@ Interactive bootstrap for a fresh (or freshly-claudified) project. Triggers: `/p
 
 When the flow completes (full mode), the project has:
 
-1. `CLAUDE.md` — generated from `plugins/forge/docs/conventions/claude-md-template.md`, populated for the chosen stack.
-2. `.claude/skills/` — `kit-*` templates copied from `plugins/forge/skill-templates/<stack>/`.
+1. `CLAUDE.md` — single-platform: per-stack body. Multi-platform: short overview + table of per-platform CLAUDE.md links (written by step 4.5).
+2. `.claude/skills/` — `kit-*` templates from `plugins/forge/skill-templates/<stack>/`. Single-platform at repo root; multi-platform under each `<path>/.claude/skills/`.
 3. `.claude/settings.json` — allowed Bash list + stack-appropriate defaults.
-4. `.claude/tracker.json` — backend declared (linear / github-personal / github-org / markdown), backend-specific fields populated per `plugins/forge/docs/conventions/tracker-json.md`. Multi-platform projects also write `structure` (if `monorepo`) and `platforms[]`, plus a minimal child `tracker.json` per platform sub-folder.
+4. `.claude/tracker.json` — backend declared (linear / github-personal / github-org / markdown), backend-specific fields populated per `plugins/forge/docs/conventions/tracker-json.md`. Multi-platform projects also write `structure` (if `monorepo`) and `platforms[]`, plus a minimal child `tracker.json` (`backend` + `parent_path: "../"`) per platform sub-folder.
 5. `.mcp.json` — registers code-review-graph MCP server (if `code-review-graph` CLI is on PATH).
-6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
-7. `docs/owner-overview.md` — always; scaffolded in step 6.5 from `plugins/forge/skill-templates/_common/owner-overview.md` with project-init answers substituted.
-8. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
+6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files). Always at **repo root** (multi-platform projects never duplicate this per platform).
+7. `docs/owner-overview.md` — always; scaffolded in step 6.5 from `plugins/forge/skill-templates/_common/owner-overview.md` with project-init answers substituted. Always at repo root.
+8. Per-platform `<path>/CLAUDE.md` (multi-platform only) — per-stack body with the mandatory cross-ref block injected (see `references/scaffolding-logic.md` S2.3).
+9. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -93,13 +94,25 @@ Full pipeline: `references/flutter-scaffolder.md`. If this branch runs, steps 4C
 
 Per `references/scaffold-new-stack.md`: ask the user to walk through their typical workflow for `kit-create-feature`, `kit-add-route` (or equivalent), compose SKILL.md files from the answers, save to `plugins/forge/skill-templates/<stack>/` for future reuse, and also drop a copy in `<project>/.claude/skills/`.
 
+### 4.5. Root + per-platform scaffolding (multi-platform only)
+
+If `platforms.length > 1` (recorded by `references/multi-platform-interview.md`), follow `references/scaffolding-logic.md` to:
+
+- Write the **root multi-platform `CLAUDE.md`** (short overview + table of per-platform CLAUDE.md links + pointer to shared `docs/`).
+- Iterate `platforms[]`: `mkdir -p <path>/.claude/skills/`, copy the resolved `plugins/forge/skill-templates/<name>/` into `<path>/`, write `<path>/CLAUDE.md` (per-stack body with the mandatory cross-ref block `> Roadmap, ADRs, owner overview live at \`../docs/\`. See \`../CLAUDE.md\` for the project-wide overview.` injected after the H1), write a minimal `<path>/.claude/tracker.json` (`backend` + `parent_path: "../"`).
+- Skip `<path>/docs/` scaffolding — shared `docs/` lives only at repo root.
+
+Single-platform projects skip this step entirely (root layout handled by steps 4 → 5 → 6 → 7.25 as before).
+
 ### 4C. Generate per-project SKILLS.md
 
 Run `plugins/forge/scripts/generate-project-skills.sh <stack> <project>/.claude/SKILLS.md` to emit a stack-filtered skills index. Add one pointer line to CLAUDE.md `## Skills`: "See `.claude/SKILLS.md` for the auto-generated, stack-filtered list."
 
 ### 5. Generate CLAUDE.md
 
-Read `plugins/forge/docs/conventions/claude-md-template.md` and substitute placeholders per `references/claude-md-scaffold.md` (project name, tagline, stack, Essential commands, Architecture, Mandatory rules, Documentation inventory, Linear workflow, Global references, Skills).
+**Multi-platform** (`platforms.length > 1`): step 4.5 already wrote the root overview `CLAUDE.md` and per-platform `<path>/CLAUDE.md` files. This step is a **no-op** in that mode.
+
+**Single-platform**: read `plugins/forge/docs/conventions/claude-md-template.md` and substitute placeholders per `references/claude-md-scaffold.md` (project name, tagline, stack, Essential commands, Architecture, Mandatory rules, Documentation inventory, Linear workflow, Global references, Skills). Write to `<project>/CLAUDE.md`.
 
 ### 6. Initialize project docs structure
 
