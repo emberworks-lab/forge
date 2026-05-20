@@ -24,13 +24,22 @@ For GitHub backend, run multi-repo detection once — see `references/multi-repo
 
 ## Flow
 
+### Existing-ticket-reference branch
+
+If `/forge:create-epic` is invoked with a ticket URL or ID (e.g. `/forge:create-epic 14`), branch before Step 0:
+
+1. Read the ticket body via the `get_ticket` recipe in `plugins/forge/docs/tracker-backends/<backend>.md`.
+2. Invoke `forge:brainstorm` with input: `"Existing ticket body: <body>. Stress-test: is it detailed enough? correctly decomposed? edge cases covered?"`. The brainstorm spec replaces the existing body.
+3. Write the brainstorm spec back into the ticket body using the backend's native edit primitive (`gh issue edit --body-file -` for github, `save_issue` for linear, direct file write for markdown).
+4. Continue with Step 1 (load context) — the updated body is now the brief, so Step 2 is skipped and Step 0's gate is already satisfied.
+
 ### Step 0 — Brainstorming gate (REQUIRED for non-trivial epics)
 
 For any epic that's NOT pure infra / docs / config, invoke `forge:brainstorm` first. The gate:
 
 > Do NOT draft tracker tickets, write any code, or take any implementation action until the user has approved a design. Brainstorm output (the design spec) becomes the source for the epic body.
 
-Skip the gate ONLY for documentation-only epics, pure renaming / cleanup, manual-setup epics (`exec:manual`), or FORGE-style infra/tooling targeting `~/.claude/`. If the user explicitly says "skip brainstorm" / "пропускаємо brainstorm" — respect that and proceed.
+Skip the gate ONLY for documentation-only epics, pure renaming / cleanup, or manual-setup epics (`exec:manual`). If the user explicitly says "skip brainstorm" / "пропускаємо brainstorm" — respect that and proceed.
 
 When invoking brainstorm: pass the brief as starting prompt. Spec lands at `<project>/docs/superpowers/specs/<date>-<topic>-design.md`. Use it as primary input to Step 3 + 4.
 
