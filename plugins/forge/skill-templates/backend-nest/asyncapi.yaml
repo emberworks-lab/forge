@@ -1,0 +1,28 @@
+asyncapi: "3.0.0"
+
+info:
+  title: My NestJS App
+  version: "0.0.1"
+  description: >
+    AsyncAPI skeleton — replace with your app name and real channels.
+    See docs/api/websockets.md for the human-readable channel catalog.
+
+servers:
+  local:
+    host: "localhost:3000"
+    protocol: ws
+    description: Local development server
+
+channels: {}
+# Add channels here as you introduce NestJS Gateways.
+# Example:
+#
+# notifications:
+#   address: /notifications
+#   messages:
+#     notificationEvent:
+#       $ref: "#/components/messages/NotificationEvent"
+
+components:
+  messages: {}
+  schemas: {}
