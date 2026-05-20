@@ -51,13 +51,23 @@ Requires `pipx` (install via Homebrew: `brew install pipx && pipx ensurepath`).
 
 ### Register with Claude Code
 
-Run from any project root where you want graph-aware reviews:
+**Do NOT run `code-review-graph install --platform claude-code`.** That command overwrites/extends `CLAUDE.md`, injects four upstream skills into `.claude/skills/`, and adds auto-update hooks to `.claude/settings.json` — all of which conflict with the forge scaffold.
 
-```
-code-review-graph install --platform claude-code
+Instead, MCP registration is handled by `/forge:project-init` (sub-issue #33), which writes a minimal project-local `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "code-review-graph": {
+      "command": "uvx",
+      "args": ["code-review-graph", "serve"],
+      "type": "stdio"
+    }
+  }
+}
 ```
 
-This writes a project-local `.mcp.json` that registers the MCP server, injects usage instructions into `CLAUDE.md`, installs four project skills (`debug-issue`, `explore-codebase`, `refactor-safely`, `review-changes`), and adds a `.claude/settings.json` hook that keeps the graph up to date after every file edit.
+Restart Claude Code after `project-init` runs so the MCP server is loaded.
 
 ### MCP tools provided
 
@@ -72,17 +82,20 @@ This writes a project-local `.mcp.json` that registers the MCP server, injects u
 | `get_architecture_overview` | High-level codebase structure |
 | `list_communities` | Logical modules detected by community analysis |
 
-### Build the graph (first run)
+### Build the graph
+
+`/forge:project-init` runs the initial `code-review-graph build` for a fresh project. `/forge:graph-refresh` (sub-issue #30) handles incremental updates and is wired into `/forge:execute-epic` and `/forge:epic-close`.
+
+For manual operation:
 
 ```
-code-review-graph build
+code-review-graph build              # full scan (initial)
+code-review-graph build --incremental # update after edits
 ```
-
-After the initial build, the `PostToolUse` hook keeps the graph incrementally updated on every edit.
 
 ### Verify
 
-Restart Claude Code after install. The `code-review-graph` server should appear in the MCP tool listing. Smoke-test with:
+Restart Claude Code after `project-init` registers the MCP. The `code-review-graph` server should appear in the MCP tool listing. Smoke-test with:
 
 ```
 code-review-graph status
