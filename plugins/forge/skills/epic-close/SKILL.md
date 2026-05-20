@@ -110,15 +110,13 @@ No default. Wait for explicit `A` / `B` / `C`.
 
 ### Step 6 — Execute selected action
 
-Per-action hand-off contract (in-place edits, sub-epic spawn or defer): [`references/post-tests-actions.md`](references/post-tests-actions.md).
+Full implementation, sub-branch naming, and recursion cap: [`references/step-6-execution.md`](references/step-6-execution.md). Per-action hand-off shape (Step 5 prompt contract): [`references/post-tests-actions.md`](references/post-tests-actions.md).
 
-**Step 6 detailed implementation lives in this skill, contributed by EPIC B #3 / ticket #47.** This ticket (#46) fixes the **shape** of the hand-off only:
+- **Action A** — promote all `in_place_candidates` into `sub_epic_candidates`, invoke `forge:create-epic` with `deferred=true`, then **exit Step 6** (no merge, skip Step 7).
+- **Action B** — apply `in_place_candidates` fixes inline, re-run Step 0b, invoke `forge:create-epic` with `deferred=true` for `sub_epic_candidates`, continue to Step 7.
+- **Action C** — apply `in_place_candidates` fixes inline, re-run Step 0b, invoke `forge:create-epic` with `deferred=false` + `branch_hint=feature/<epic_ref>/postfix-<N>`, invoke `forge:execute-epic` on the new sub-epic, squash-merge the postfix branch back into the epic branch, re-run Step 0b, continue to Step 7.
 
-- Action A — promote all `in_place_candidates` into `sub_epic_candidates`, queue all as backlog.
-- Action B — apply `in_place_candidates` fixes inline; queue `sub_epic_candidates` as backlog (deferred).
-- Action C — apply `in_place_candidates` fixes inline; spawn one new epic per `sub_epic_candidates` immediately via `forge:create-epic`.
-
-Invariants: stay on the current branch, no commits in this step, re-run Step 0b after any in-place edits (halt on regression).
+Invariants: stay on the epic branch except for the Action C child-branch round-trip; no commits except the Action C merge-back; halt on any Step 0b regression. Recursion (Action C spawning a sub-epic that itself triggers Action C) is capped at depth 2 — the third level strips `C` from the Step 5 prompt.
 
 ### Step 7 — Decision tree (merge / draft PR / cleanup)
 

@@ -1,6 +1,6 @@
 # Post-tests actions — Step 5/6 hand-off shape
 
-This file specifies the user prompt (Step 5) and the hand-off contract (Step 6) that consume the classifier output from Step 4. Step 6's **detailed implementation** is reserved for EPIC B #3 / ticket #47 — this file fixes the **shape** of the hand-off so that ticket can land without re-negotiating boundaries.
+This file specifies the user prompt (Step 5) and the per-action **shape** (Step 6) that consume the classifier output from Step 4. Step 6's full implementation — sub-branch naming, recursion cap, merge-back flow — lives in [`step-6-execution.md`](step-6-execution.md). This file fixes the contract the orchestrator must honor; that file fixes how the orchestrator honors it.
 
 ## Step 5 — user prompt (3 actions)
 
@@ -31,39 +31,41 @@ No default. Wait for explicit response.
 
 ## Step 6 — hand-off contract per action
 
-This is the **shape** the orchestrator must invoke. The actual implementation (which subagent, which tracker call, which order) is owned by ticket #47.
+This is the **shape** the orchestrator must invoke. The execution details (sub-branch naming, recursion cap, merge-back, exit-vs-continue policy) live in [`step-6-execution.md`](step-6-execution.md).
 
 ### Action A — defer everything
 
-1. Merge `classifier.in_place_candidates` into `classifier.sub_epic_candidates` (each becomes its own sub-epic candidate).
-2. For every candidate now in the unified list, queue a backlog entry — implementation owned by #47 (likely `forge:create-epic` with `--draft` / `--deferred` semantics).
-3. No code edits on the current branch. Continue to Step 7.
+1. Merge `classifier.in_place_candidates` into `classifier.sub_epic_candidates` (each becomes a sub-epic candidate).
+2. Invoke `forge:create-epic` with `deferred=true` and the merged candidate list as input.
+3. No code edits on the current branch. **Exit Step 6** without continuing to Step 7 — the original epic is not merged this run.
 
 ### Action B — fix-and-defer
 
-1. For every `classifier.in_place_candidates` entry, apply the `fix_outline` on the current branch in this session. Each fix is a small, localized edit (≤ 30 lines, single file).
-2. For every `classifier.sub_epic_candidates` entry, queue a backlog entry (deferred — no immediate spawn). Implementation owned by #47.
-3. After in-place edits land → re-run Step 0b (tests-pass hard gate). Halt on fail.
+1. For every `classifier.in_place_candidates` entry, apply the `fix_outline` on the current branch in this session (small, localized edits per the classifier's ≤ 30-lines / single-file guarantee).
+2. Re-run Step 0b (tests-pass hard gate). Halt on fail.
+3. Invoke `forge:create-epic` with `deferred=true` and `classifier.sub_epic_candidates` as input.
 4. Continue to Step 7.
 
 ### Action C — fix-and-spawn-now
 
 1. Apply every `classifier.in_place_candidates` `fix_outline` on the current branch (same as Action B step 1).
 2. Re-run Step 0b. Halt on fail.
-3. For every `classifier.sub_epic_candidates` entry, spawn a new sub-epic **immediately** via `forge:create-epic` (one epic per candidate, or grouped — grouping policy owned by #47).
-4. Execute spawned sub-epics? — that is a policy decision for #47 (likely user-prompt: "execute now / leave on backlog"). The shape here only commits to the **spawn**, not the execute.
-5. Continue to Step 7.
+3. Invoke `forge:create-epic` with `deferred=false` and a `branch_hint` of `feature/<epic_ref>/postfix-<N>` (sub-branch naming convention).
+4. Invoke `forge:execute-epic` on the new sub-epic. It runs on the postfix sub-branch.
+5. On sub-epic completion, squash-merge the postfix branch back into the parent epic branch.
+6. Re-run Step 0b on the parent branch. Continue to Step 7.
+
+Recursion (Action C from a sub-epic's own epic-close) is allowed but capped at depth 2.
 
 ## Invariants (all three actions)
 
-- The current epic branch is preserved. No branching, no checkout.
-- No commits. The user runs `forge:commit` after Step 7 (Path A merge / Path B PR) or leaves the changes uncommitted (Path C cleanup).
+- The current epic branch is preserved except for the Action C child-branch round-trip.
+- No commits except the Action C merge-back squash commit.
 - The classifier output JSON is consumed read-only. The orchestrator does NOT re-call the classifier.
 - If any action's in-place edit phase fails (Step 0b regression), halt with the failure snippet — do not advance to Step 7.
 
 ## What this file does NOT specify
 
-- Which subagent applies the in-place fixes (could be one Sonnet agent per file, or a single batched pass — owned by #47).
-- The exact `forge:create-epic` invocation flags for sub-epic spawn (owned by #47).
-- Backlog-entry format for deferred sub-epics — depends on the tracker backend (owned by #47).
-- Re-classification policy if a fix introduces new findings (out of scope for this round; future work).
+- The exact sequence of git commands for Action C's sub-branch round-trip (lives in [`step-6-execution.md`](step-6-execution.md)).
+- The `forge:create-epic` candidate-to-sub-issue mapping policy — owned by `forge:create-epic` itself.
+- Re-classification policy if a fix introduces new findings (out of scope; the recursion cap is the safety valve).
