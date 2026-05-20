@@ -22,10 +22,10 @@ When the flow completes (full mode), the project has:
 1. `CLAUDE.md` — generated from `plugins/forge/docs/conventions/claude-md-template.md`, populated for the chosen stack.
 2. `.claude/skills/` — `kit-*` templates copied from `plugins/forge/skill-templates/<stack>/`.
 3. `.claude/settings.json` — allowed Bash list + stack-appropriate defaults.
-4. `.claude/tracker.json` — backend declared (linear / github / markdown / skip).
+4. `.claude/tracker.json` — backend declared (linear / github-personal / github-org / markdown), backend-specific fields populated per `plugins/forge/docs/conventions/tracker-json.md`.
 5. `.mcp.json` — registers code-review-graph MCP server (if `code-review-graph` CLI is on PATH).
 6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
-7. Linear project + P0/P1 epics — if step 2.6 = Yes.
+7. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -48,11 +48,22 @@ Ask the seven-question batch in `references/stack-interview-common.md` (project 
 
 Ask: "Scaffold `docs/00_meta/`? (decisions-log + roadmap + docs-workflow + glossary). Recommended." Options: **Yes** / **No** / **Skip — decide later**. Record; apply in step 6.
 
-### 2.6. Linear automation question
+### 2.6. Tracker backend question
 
-Ask: "Create a Linear project for backlog tracking?" Options: **Yes (Recommended)** / **No** / **Skip — I'll add later**. Record; apply in step 7.5.
+Ask: "Tracker backend for this repo?" Single-select, **default: `github-personal`**.
+
+1. **Linear** — Linear team + project, MCP-driven
+2. **GitHub personal** — issues + Projects v2 on your personal account (default)
+3. **GitHub org** — issues + Projects v2 on an organization
+4. **Markdown** — local files under `docs/00_meta/manual-tracker`
+
+Record the choice; the actual backend setup (interview + writing `tracker.json`) runs in step 7.25 via `references/tracker-setup.md`. The `tracker.json` schema and backend-specific fields are defined in `plugins/forge/docs/conventions/tracker-json.md` and `plugins/forge/docs/tracker-backends/<backend>.md`.
 
 Inherited hard rules (see `plugins/forge/docs/conventions/tracker-tickets.md`): never offer team creation; never propose cycles or milestones by default; never set priority.
+
+### 2.7. Linear automation question (only if 2.6 = Linear)
+
+If 2.6 selected `linear`, ask: "Create a Linear project for backlog tracking?" Options: **Yes (Recommended)** / **No** / **Skip — I'll add later**. Record; apply in step 7.5. Skip entirely if 2.6 selected any other backend.
 
 ### 3. Resolve template path
 
@@ -128,11 +139,11 @@ Create `<project>/.claude/settings.json` per `references/settings-json.md` — a
 
 ### 7.25. Tracker setup
 
-Run `references/tracker-setup.md`. Writes `<project>/.claude/tracker.json`. In the full flow, no overwrite-confirmation prompt (the project is being initialized fresh). If the user picks `linear`, step 7.5 reuses that team — no second team prompt.
+Run `references/tracker-setup.md` with the backend chosen in step 2.6. Writes `<project>/.claude/tracker.json` per the schema in `plugins/forge/docs/conventions/tracker-json.md`. In the full flow, no overwrite-confirmation prompt (the project is being initialized fresh). If the user picked `linear`, step 7.5 reuses that team — no second team prompt.
 
 ### 7.5. Linear automation
 
-If step 2.6 = **Yes**, follow `references/linear-automation.md`: resolve team → create project → detect credential needs → create P0 Bootstrap epic + Mode M sub-issues + P1 MVP placeholder → print summary. If **No** / **Skip**, make zero Linear MCP calls; jump to step 8.
+If step 2.6 = `linear` **and** step 2.7 = **Yes**, follow `references/linear-automation.md`: resolve team → create project → detect credential needs → create P0 Bootstrap epic + Mode M sub-issues + P1 MVP placeholder → print summary. Otherwise (any non-Linear backend, or Linear with **No** / **Skip**), make zero Linear MCP calls; jump to step 8.
 
 ### 8. Output
 
