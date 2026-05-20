@@ -66,9 +66,9 @@ Wait for user response. No default.
 
 Full per-path step list: see [`references/path-details.md`](references/path-details.md). Summary:
 
-- **Path A** (Merge): simplify → re-test → authorization gate → squash+merge → shared follow-ups.
-- **Path B** (Draft PR): simplify → re-test → shared follow-ups → `forge:pr-create <EPIC-ID> --no-confirm` → append PR URL.
-- **Path C** (Cleanup): skip simplify + merge/PR; shared follow-ups with "abandoned" framing.
+- **Path A** (Merge): simplify → graph-refresh → review → ultrareview → re-test → authorization gate → squash+merge → shared follow-ups.
+- **Path B** (Draft PR): simplify → graph-refresh → review → ultrareview → re-test → shared follow-ups → `forge:pr-create <EPIC-ID> --no-confirm` → append PR URL.
+- **Path C** (Cleanup): skip simplify + graph-refresh + review + merge/PR; shared follow-ups with "abandoned" framing.
 
 ### Step 3 — Shared follow-ups
 
@@ -77,6 +77,19 @@ Full per-path step list: see [`references/path-details.md`](references/path-deta
 > "Запускаю `forge:simplify-branch` — може змінювати код напряму. ОК? (y / skip / abort)"
 
 `y` → invoke. After: "Продовжуємо? (y / щось ще поправити)". If files changed → re-run Step 0b before merge/PR.
+
+#### 3a.3. Graph refresh (Path A, B)
+
+Invoke `forge:graph-refresh` inline (no user prompt — quick, idempotent, < 5s typical). The skill self-skips when `code-review-graph` is not installed or `.mcp.json` is absent; in both cases it prints a one-line skip notice and exits 0. Relay its one-line summary (e.g. `graph-refresh: 2 files updated, 41 nodes, 87 edges (3.2s)`) into the epic-close transcript so the next step has fresh graph context. Do not halt on skip.
+
+#### 3a.6. Local review (Path A, B)
+
+> "Запускаю `forge:review --branch` — повний епік-branch vs base, read-only. (y / skip / abort)"
+
+`y` → invoke `forge:review --branch`. The skill returns three reviewer-agent JSON payloads plus a combined JSON blob (per `plugins/forge/skills/review/references/output-format.md`). Print the per-agent summary count line (e.g. `architecture-focus: 1 high, 2 medium, 0 low`) into the transcript and keep the combined JSON for the downstream classifier. `skip` → continue without findings. `abort` → halt epic-close.
+
+<!-- forge:review output (Step 3a.6) is the input to the classifier in references/classifier-prompt.md.
+     Classifier invocation + user-prompt logic is wired by EPIC B #3 (sub-epic-from-bugs). -->
 
 #### 3a.5. Optional /ultrareview cloud audit
 
