@@ -45,12 +45,12 @@ Existing skills cross-referenced against every `forge:<name>` token in `plugins/
 |---|---|---|---|
 | 1 | `forge:kit-update-docs` | `epic-close` Step (docs sync, line 161), `project-init` (line 136) | Build the skill (migration gap A) |
 | 2 | `forge:e2e` (backend) | `execute-ticket` Step 3.5 (l53) + Step 8.5 (l85), `execute-epic` Step 3.5 (l45) | Build the skill (migration gap A), mirror `forge:e2e-web` |
-| 3 | `forge:subagent-driven-development` | `execute-ticket` Step 6 (l65) + `implement-delegation.md` + `e2e-tdd-loop.md` | **Namespace bug** — exists as `superpowers:subagent-driven-development`. Rewrite ref, OR build a forge wrapper |
-| 4 | `forge:verification-before-completion` | `execute-ticket` Step 10 (l93), `execute-epic` Step 6.5 (l72) | **Namespace bug** — exists as `superpowers:verification-before-completion`. Rewrite ref |
+| 3 | `forge:subagent-driven-development` | `execute-ticket` Step 6 (l65) + `implement-delegation.md` + `e2e-tdd-loop.md` | **RESOLVED** — built as a forge skill (adapted from superpowers, `inspired-by`). NOT repointed at `superpowers:` — that is forbidden by audit check 6 and breaks standalone install |
+| 4 | `forge:verification-before-completion` | `execute-ticket` Step 10 (l93), `execute-epic` Step 6.5 (l72) | **RESOLVED** — built as a forge skill (adapted, `inspired-by`); consumers now invoke it, inline Iron Law duplication removed |
 | 5 | `forge:improve-codebase-architecture` | `diagnose` references/phases.md (l62) | Build skill (gap A) or rewrite as a plain recommendation |
 | 6 | `forge:log-decision` | `docs-workflow.md`, `_scaffold_flutter.py` (generated CLAUDE.md table) | Build skill (gap A) or repoint at the `decision-log/` convention |
 
-**Most alarming: #3 and #4.** `execute-ticket` — the workhorse skill — delegates its ENTIRE implementation phase (#3) and its completion gate (#4) to skills that don't exist under the `forge:` namespace. They exist under `superpowers:`. This looks like the EPIC A migration over-eagerly rewrote `superpowers:* → forge:*` even for skills that legitimately stay in superpowers. **This means every `forge:execute-ticket` run is currently invoking phantom skills at its two most important steps.** (It likely "worked" tonight only because I ran subagents with generic prompts, not the real execute-ticket skill.)
+**#3 and #4 — resolution note.** `execute-ticket` delegated its implementation phase (#3) and completion gate (#4) to `forge:*` skills that were never built — the EPIC A migration left the invocations but never created the skills (and the behavior had no `superpowers:` equivalent it was allowed to point at, since check 6 forbids that). Fix taken: **build both as proper forge skills** adapted from the superpowers originals (with `inspired-by` credit), then point the consumers at them and delete the inline duplication. This preserves the plugin's encapsulation + reusability rule rather than inlining. Done on branch `feature/forge-105-plugin-integrity`.
 
 ### FUTURE sketches (referenced in design/research/candidate docs — NOT bugs, intentional forward-refs)
 

@@ -90,7 +90,7 @@ Compose a `## Manual test cases` tracker comment: 3-5 bullets, action-oriented, 
 
 ### 10. Verification gate (REQUIRED)
 
-Invoke `forge:verification-before-completion`. Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. Re-run lint, confirm 0 errors in this turn; re-run tests, confirm pass; read actual output, not assumed state. THEN proceed to commit and DONE. For FORGE config-only tickets: the gate becomes "open the file you just edited, confirm the change is present in this turn".
+Invoke `forge:verification-before-completion` against the about-to-claim DONE state — it owns the Iron Law gate (fresh lint + test evidence gathered in this turn). Proceed to commit and DONE only on confirmed-clean. For FORGE config-only tickets the gate narrows to: open the file you just edited and confirm the change is present in this turn.
 
 ### 11. Commit (if `--commit`)
 

@@ -69,7 +69,7 @@ Read agent outputs in this turn (Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VE
 
 ### 6.5. Verification gate before completion claim (REQUIRED)
 
-Invoke `forge:verification-before-completion` (or apply its Iron Law inline): confirm fresh evidence of clean lint + pass tests before proceeding.
+Invoke `forge:verification-before-completion`: confirm fresh evidence of clean lint + pass tests, gathered in this turn, before proceeding.
 
 ### 7. Aggregate manual test cases on epic
 

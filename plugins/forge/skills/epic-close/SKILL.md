@@ -24,7 +24,7 @@ At every tracker-touching step: read `<project>/.claude/tracker.json` → `backe
 
 #### 0b. Tests-pass hard gate (REQUIRED)
 
-Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. Re-run, don't trust prior runs.
+Apply `forge:verification-before-completion` — fresh evidence, re-run in this turn; don't trust prior runs.
 
 - Spawn `linter-runner` agent (`mode=report`, no path filter) — model **`sonnet`**.
 - Spawn `test-runner` agent (`mode=report`, full suite) — model **`sonnet`**.
