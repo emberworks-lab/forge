@@ -81,6 +81,26 @@ These appear only in `docs/design-research/` artifacts (#74 candidate-skills, #8
 
 ---
 
+## E2E architecture — parent/child split (user decision)
+
+Initial P0 fix built `forge:e2e` as the backend skill (sibling of `forge:e2e-web`). User pushed back: that's the wrong shape for a system that will grow web + backend + mobile (and mobile further into flutter/rn/kmp/native + device target). Restructured to a composition hierarchy:
+
+```
+forge:e2e            fundamental — universal rules (opt-in model, RED→GREEN lifecycle,
+                     validation discipline) + router (resolve flavor → dispatch child)
+├── forge:e2e-web        Playwright (external; not vendored; init asks opt-in)
+├── forge:e2e-backend    DB-isolated suite (renamed from the first forge:e2e)
+└── forge:e2e-mobile     future router → flutter/rn/kmp/native + iOS-sim/Android-emu
+```
+
+**Why:** matches the plugin's composition principle — each level owns one responsibility and the parent composes by dispatch, not by inlining. Consumers (execute-ticket / execute-epic / epic-close) now call the single entry point `forge:e2e`; routing lives in one place instead of being duplicated as per-platform bullets across three skills.
+
+**Mobile:** documented in the parent as a future branch; the `forge:e2e-mobile` child + its framework sub-children are built when mobile e2e leaves research (#86-89).
+
+**Known follow-up (tracked in #105):** `forge:project-init` does not yet invoke `forge:e2e --init` at setup time — the wiring was never added (epic H #82 only shipped the template). Surfaced honestly in the e2e skills' trigger sections rather than claimed.
+
+---
+
 ## Note on tonight's epic closures
 
 The P0 #3/#4 namespace bugs mean `forge:execute-ticket` and `forge:execute-epic` were *already* referencing phantoms before tonight. Tonight's epics were executed via generic subagent prompts (not the real skills), so the phantom invocations were never actually hit — which is why the work completed. But anyone running `/forge:execute-ticket` for real today would hit them. This raises the priority of Phase 3 P0 fixes above the deferred content work.

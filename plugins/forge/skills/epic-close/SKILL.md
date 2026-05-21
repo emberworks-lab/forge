@@ -28,12 +28,11 @@ Apply `forge:verification-before-completion` — fresh evidence, re-run in this 
 
 - Spawn `linter-runner` agent (`mode=report`, no path filter) — model **`sonnet`**.
 - Spawn `test-runner` agent (`mode=report`, full suite) — model **`sonnet`**.
-- **Web e2e per platform.** Read `<project>/.claude/tracker.json` → `platforms[]` per `plugins/forge/docs/conventions/tracker-json.md` §4 reader algorithm. For each platform whose name matches `web*` (or whose `path/package.json` lists `next` / `react` / `vite` / `astro`) AND has `<platform.path>/.claude/e2e-web.json` present with `opted_in: true`: invoke `forge:e2e-web --run` with `cwd=<platform.path>`, `mode=report` (full suite, no `path_filter`). The skill dispatches the `test-runner` agent — model **`sonnet`** — with `type=e2e-web`. Platforms without the opt-in marker, or with `opted_in: false`, are skipped silently. If `platforms[]` is absent, treat the repo root as the single default platform and apply the same marker check.
-- **Backend e2e per platform.** Same `platforms[]` walk: for each platform with `<platform.path>/.claude/e2e.json` present and `db_isolation` other than `"none"`: invoke `forge:e2e --run` with `cwd=<platform.path>`, `mode=report` (full suite). The skill provisions a throwaway DB, dispatches the `test-runner` agent — model **`sonnet`** — and tears down. Platforms with `db_isolation: "none"` or no marker are skipped silently.
+- **E2E per platform.** Invoke `forge:e2e --run` (no `--flavor`): the parent walks `tracker.json` `platforms[]` (reader algorithm: `plugins/forge/docs/conventions/tracker-json.md` §4), dispatches each opted-in platform to its child (`forge:e2e-web` / `forge:e2e-backend`), and runs each full suite in `mode=report`. Children dispatch the `test-runner` agent — model **`sonnet`**. Platforms not opted in are skipped silently; if `platforms[]` is absent, the repo root is the single default platform.
 
-Read all agent outputs in this turn. If linter, unit tests, or any web/backend e2e run fails:
+Read all agent outputs in this turn. If linter, unit tests, or any e2e run fails:
 
-> "EMB-X tests-pass gate FAILED. Lint: <count> / Tests: <count> / E2E-web: <platform:count> / E2E-backend: <platform:count>. Snippet: <first failure>. No close actions until clean. Fix and re-run, OR `/execute-epic --start-from <ticket>`."
+> "EMB-X tests-pass gate FAILED. Lint: <count> / Tests: <count> / E2E: <platform:count>. Snippet: <first failure>. No close actions until clean. Fix and re-run, OR `/execute-epic --start-from <ticket>`."
 
 Halt. If all pass → continue.
 
