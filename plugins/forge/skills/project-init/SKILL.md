@@ -19,13 +19,15 @@ Interactive bootstrap for a fresh (or freshly-claudified) project. Triggers: `/p
 
 When the flow completes (full mode), the project has:
 
-1. `CLAUDE.md` — generated from `plugins/forge/docs/conventions/claude-md-template.md`, populated for the chosen stack.
-2. `.claude/skills/` — `kit-*` templates copied from `plugins/forge/skill-templates/<stack>/`.
+1. `CLAUDE.md` — single-platform: per-stack body. Multi-platform: short overview + table of per-platform CLAUDE.md links (written by step 4.5).
+2. `.claude/skills/` — `kit-*` templates from `plugins/forge/skill-templates/<stack>/`. Single-platform at repo root; multi-platform under each `<path>/.claude/skills/`.
 3. `.claude/settings.json` — allowed Bash list + stack-appropriate defaults.
-4. `.claude/tracker.json` — backend declared (linear / github / markdown / skip).
+4. `.claude/tracker.json` — backend declared (linear / github-personal / github-org / markdown), backend-specific fields populated per `plugins/forge/docs/conventions/tracker-json.md`. Multi-platform projects also write `structure` (if `monorepo`) and `platforms[]`, plus a minimal child `tracker.json` (`backend` + `parent_path: "../"`) per platform sub-folder.
 5. `.mcp.json` — registers code-review-graph MCP server (if `code-review-graph` CLI is on PATH).
-6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files).
-7. Linear project + P0/P1 epics — if step 2.6 = Yes.
+6. `docs/00_meta/` — if step 2.5 = Yes (scaffold the 4 meta files). Always at **repo root** (multi-platform projects never duplicate this per platform).
+7. `docs/owner-overview.md` — always; scaffolded in step 6.5 from `plugins/forge/skill-templates/_common/owner-overview.md` with project-init answers substituted. Always at repo root.
+8. Per-platform `<path>/CLAUDE.md` (multi-platform only) — per-stack body with the mandatory cross-ref block injected (see `references/scaffolding-logic.md` S2.3).
+9. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -40,19 +42,39 @@ When the flow completes (full mode), the project has:
 - `pwd` to confirm root.
 - Detect existing `CLAUDE.md`, `.claude/`, `.git/`. If any exist, ask "Re-init? (overwrite / merge / abort)" before continuing.
 
-### 2. Stack interview
+### 2. Project type — single vs multi-platform
 
-Ask the seven-question batch in `references/stack-interview-common.md` (project type, framework, persistence, hosting, Linear team, design system, existing scaffolding). The selected `project_type + framework` resolves the stack key used by step 3.
+Ask first (single-select, **default: `single-platform`**):
+
+> "Project type? 1. **Single-platform** — one codebase, one stack. 2. **Multi-platform** — multiple platforms in the same repo (backend + mobile, web + backend, …)."
+
+- `single-platform` → continue to step 2.1 below.
+- `multi-platform` → jump to `references/multi-platform-interview.md` (Steps 2a–2e). It produces `structure`, `platforms[]`, and `selected_stacks[]`; on return, skip step 2.1 and continue at step 2.5. The first entry in `platforms[]` is the primary stack used wherever a single `stack key` is required (step 3 / step 4A / step 5).
+
+### 2.1. Stack interview (single-platform only)
+
+Ask the seven-question batch in `references/stack-interview-common.md` (project type, framework, persistence, hosting, Linear team, design system, existing scaffolding). The selected `project_type + framework` resolves the stack key used by step 3. Record `platforms[]` as `[{ name: "<stack key>", path: "." }]` for the tracker writer in step 7.25; `structure` stays at the default `"sub-folder"` and is **not** written to tracker.json (readers default to it).
 
 ### 2.5. Docs scaffold question
 
 Ask: "Scaffold `docs/00_meta/`? (decisions-log + roadmap + docs-workflow + glossary). Recommended." Options: **Yes** / **No** / **Skip — decide later**. Record; apply in step 6.
 
-### 2.6. Linear automation question
+### 2.6. Tracker backend question
 
-Ask: "Create a Linear project for backlog tracking?" Options: **Yes (Recommended)** / **No** / **Skip — I'll add later**. Record; apply in step 7.5.
+Ask: "Tracker backend for this repo?" Single-select, **default: `github-personal`**.
+
+1. **Linear** — Linear team + project, MCP-driven
+2. **GitHub personal** — issues + Projects v2 on your personal account (default)
+3. **GitHub org** — issues + Projects v2 on an organization
+4. **Markdown** — local files under `docs/00_meta/manual-tracker`
+
+Record the choice; the actual backend setup (interview + writing `tracker.json`) runs in step 7.25 via `references/tracker-setup.md`. The `tracker.json` schema and backend-specific fields are defined in `plugins/forge/docs/conventions/tracker-json.md` and `plugins/forge/docs/tracker-backends/<backend>.md`.
 
 Inherited hard rules (see `plugins/forge/docs/conventions/tracker-tickets.md`): never offer team creation; never propose cycles or milestones by default; never set priority.
+
+### 2.7. Linear automation question (only if 2.6 = Linear)
+
+If 2.6 selected `linear`, ask: "Create a Linear project for backlog tracking?" Options: **Yes (Recommended)** / **No** / **Skip — I'll add later**. Record; apply in step 7.5. Skip entirely if 2.6 selected any other backend.
 
 ### 3. Resolve template path
 
@@ -72,17 +94,48 @@ Full pipeline: `references/flutter-scaffolder.md`. If this branch runs, steps 4C
 
 Per `references/scaffold-new-stack.md`: ask the user to walk through their typical workflow for `kit-create-feature`, `kit-add-route` (or equivalent), compose SKILL.md files from the answers, save to `plugins/forge/skill-templates/<stack>/` for future reuse, and also drop a copy in `<project>/.claude/skills/`.
 
+### 4.5. Root + per-platform scaffolding (multi-platform only)
+
+If `platforms.length > 1` (recorded by `references/multi-platform-interview.md`), follow `references/scaffolding-logic.md` to:
+
+- Write the **root multi-platform `CLAUDE.md`** (short overview + table of per-platform CLAUDE.md links + pointer to shared `docs/`).
+- Iterate `platforms[]`: `mkdir -p <path>/.claude/skills/`, copy the resolved `plugins/forge/skill-templates/<name>/` into `<path>/`, write `<path>/CLAUDE.md` (per-stack body with the mandatory cross-ref block `> Roadmap, ADRs, owner overview live at \`../docs/\`. See \`../CLAUDE.md\` for the project-wide overview.` injected after the H1), write a minimal `<path>/.claude/tracker.json` (`backend` + `parent_path: "../"`).
+- Skip `<path>/docs/` scaffolding — shared `docs/` lives only at repo root.
+
+Single-platform projects skip this step entirely (root layout handled by steps 4 → 5 → 6 → 7.25 as before).
+
 ### 4C. Generate per-project SKILLS.md
 
 Run `plugins/forge/scripts/generate-project-skills.sh <stack> <project>/.claude/SKILLS.md` to emit a stack-filtered skills index. Add one pointer line to CLAUDE.md `## Skills`: "See `.claude/SKILLS.md` for the auto-generated, stack-filtered list."
 
 ### 5. Generate CLAUDE.md
 
-Read `plugins/forge/docs/conventions/claude-md-template.md` and substitute placeholders per `references/claude-md-scaffold.md` (project name, tagline, stack, Essential commands, Architecture, Mandatory rules, Documentation inventory, Linear workflow, Global references, Skills).
+**Multi-platform** (`platforms.length > 1`): step 4.5 already wrote the root overview `CLAUDE.md` and per-platform `<path>/CLAUDE.md` files. This step is a **no-op** in that mode.
+
+**Single-platform**: read `plugins/forge/docs/conventions/claude-md-template.md` and substitute placeholders per `references/claude-md-scaffold.md` (project name, tagline, stack, Essential commands, Architecture, Mandatory rules, Documentation inventory, Linear workflow, Global references, Skills). Write to `<project>/CLAUDE.md`.
 
 ### 6. Initialize project docs structure
 
 If step 2.5 answer was **Yes**, copy `plugins/forge/skill-templates/_common/docs/00_meta/{decisions-log,roadmap,docs-workflow,glossary}.md` into `<project>/docs/00_meta/`, substitute `<date>` / `<project_name>`, and inject the **Documentation inventory** table + the `/log-decision` row into CLAUDE.md. Full substitution spec: `references/docs-scaffold.md`.
+
+### 6.5. Scaffold owner-overview.md
+
+Copy `plugins/forge/skill-templates/_common/owner-overview.md` to `<project>/docs/owner-overview.md` (single-platform) or `<repo-root>/docs/owner-overview.md` (multi-platform monorepo). Substitute `{{ placeholders }}` from interview data:
+
+| Placeholder | Source |
+|---|---|
+| `{{ project_name }}` | project name from step 2 |
+| `{{ one_paragraph_elevator_pitch }}` | elevator-pitch answer collected during the interview; if not asked, prompt now: "One-sentence elevator pitch for this project?" |
+| `{{ platform_1_name }}` / `{{ platform_2_name }}` | project type / platforms from step 2 |
+| `{{ prefix }}` / `{{ ticket_prefix }}` | from `tracker.json` `prefix` field (written in step 7.25) — substitute after step 7.25 or leave the literal placeholder if tracker step has not run yet; the next `kit-update-docs` run fills it |
+| `{{ tracker_backend }}` | from `tracker.json` `backend` field (same timing note) |
+| `{{ commit_magic_word_example }}` | derived from backend (`Refs PREFIX-N:` for Linear, `Refs #N:` for GitHub, `Refs <slug>:` for Markdown) |
+
+Sections inside `<!-- manual --> ... <!-- /manual -->` guards: replace the inner example-italics placeholder text with an empty line so the user sees a clean prompt area, but keep the guard tags themselves in place.
+
+Sections inside `<!-- auto:<key> --> ... <!-- /auto:<key> -->` guards: leave the placeholder stub lines untouched — `/forge:kit-update-docs` replaces those blocks on first epic close.
+
+Create `<project>/docs/` if it does not exist. Do not overwrite an existing `owner-overview.md` without explicit user confirmation.
 
 ### 7. Settings.json defaults
 
@@ -128,11 +181,11 @@ Create `<project>/.claude/settings.json` per `references/settings-json.md` — a
 
 ### 7.25. Tracker setup
 
-Run `references/tracker-setup.md`. Writes `<project>/.claude/tracker.json`. In the full flow, no overwrite-confirmation prompt (the project is being initialized fresh). If the user picks `linear`, step 7.5 reuses that team — no second team prompt.
+Run `references/tracker-setup.md` with the backend chosen in step 2.6. Writes `<project>/.claude/tracker.json` per the schema in `plugins/forge/docs/conventions/tracker-json.md`. The writer also persists the multi-platform interview output (when step 2 = multi-platform): `structure` (only if `monorepo`) and `platforms[]` (always, including single-platform's `[{ name, path: "." }]`). When `platforms.length > 1`, write a minimal child `tracker.json` (`{ "backend": "<same>", "parent_path": "../" }`) into each `<path>/.claude/tracker.json`. In the full flow, no overwrite-confirmation prompt (the project is being initialized fresh). If the user picked `linear`, step 7.5 reuses that team — no second team prompt.
 
 ### 7.5. Linear automation
 
-If step 2.6 = **Yes**, follow `references/linear-automation.md`: resolve team → create project → detect credential needs → create P0 Bootstrap epic + Mode M sub-issues + P1 MVP placeholder → print summary. If **No** / **Skip**, make zero Linear MCP calls; jump to step 8.
+If step 2.6 = `linear` **and** step 2.7 = **Yes**, follow `references/linear-automation.md`: resolve team → create project → detect credential needs → create P0 Bootstrap epic + Mode M sub-issues + P1 MVP placeholder → print summary. Otherwise (any non-Linear backend, or Linear with **No** / **Skip**), make zero Linear MCP calls; jump to step 8.
 
 ### 8. Output
 

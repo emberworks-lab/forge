@@ -79,3 +79,16 @@ Two-axis review: **`forge:review`** (local, pre-PR) + **`code-review` plugin** (
 ### Cross-links
 
 - `forge:epic-close` Steps 3a.3 / 3a.4 / classifier hand-off are being further redesigned by EPIC B #2 / #3 — see the GitHub issue tracker for current state. This section does not restate that plan.
+
+## Owner overview update on epic close
+
+When `forge:epic-close` finalizes an epic in a project that has
+`docs/owner-overview.md`, the Features.Shipped, Features.In-progress,
+and Phases sections MUST be refreshed to reflect the just-closed
+epic. `<!-- manual -->` guarded sections are preserved verbatim.
+
+The mechanical refresher lives in `forge:kit-update-docs` (pending
+skill implementation). Until that skill exists, refresh is a
+manual TODO surfaced by `forge:epic-close`'s DRY comment step.
+
+Full spec: `forge/docs/conventions/owner-overview.md`

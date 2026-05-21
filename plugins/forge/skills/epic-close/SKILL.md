@@ -157,7 +157,7 @@ If closing a phase / milestone, use the backend's native status update (e.g., Li
 
 #### 8d. Sync docs
 
-Invoke `forge:kit-update-docs` (same-session, inline). Move the epic line in `docs/FEATURES.md` `## In progress` → `## Delivered` (A/B) or `## Deferred` (C), if `FEATURES.md` exists.
+Invoke `forge:kit-update-docs` (same-session, inline). Move the epic line in `docs/FEATURES.md` `## In progress` → `## Delivered` (A/B) or `## Deferred` (C), if `FEATURES.md` exists. If `docs/owner-overview.md` exists, `forge:kit-update-docs` MUST also refresh Features.Shipped, Features.In-progress, and Phases — see policy in `plugins/forge/CLAUDE.md § Owner overview update on epic close`.
 
 ### Step 9 — Output
 
