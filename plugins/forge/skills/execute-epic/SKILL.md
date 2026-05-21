@@ -42,7 +42,7 @@ Resolve `feature/<prefix>-<epic_number>-<slug>` (slug = lowercased+hyphenated ep
 
 ### 3.5. E2E setup gate
 
-Once, in the main session (NOT a subagent), invoke `forge:e2e`'s setup-check. `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. This gate runs **once per epic**. Per-sub-issue `forge:execute-ticket` subagents MUST NOT re-run it.
+Once, in the main session (NOT a subagent), invoke `forge:e2e --check` (backend) and `forge:e2e-web --check` (web) per the project's platforms. `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. This gate runs **once per epic**. Per-sub-issue `forge:execute-ticket` subagents MUST NOT re-run it.
 
 ### 3.6. Graph refresh (preflight)
 

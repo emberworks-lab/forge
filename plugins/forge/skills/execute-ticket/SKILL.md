@@ -50,7 +50,7 @@ Mode markers: A → `## References` with `docs/0X_*.md`; B-a → `## Steps` numb
 
 ### 3.5. E2E setup gate
 
-Standalone only: invoke `forge:e2e`'s setup-check. `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. From `forge:execute-epic` → skip entirely (the epic orchestrator ran this once at its start).
+Standalone only: invoke `forge:e2e --check` (backend) / `forge:e2e-web --check` (web). `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. From `forge:execute-epic` → skip entirely (the epic orchestrator ran this once at its start).
 
 ### 4. Mode-specific preparation
 
@@ -66,7 +66,7 @@ Detect ticket type and delegate. For FORGE-N config-only tickets → ad-hoc suba
 
 ### 6.5. E2E TDD loop (if ack opts in)
 
-Detect: ticket body has `## E2E coverage` with `required: yes | web | backend | mobile`. Absent / `required: no` → skip. Resolve flavor against `<project>/.claude/tracker.json` `platforms[]` (default `backend` when absent). RED phase: spawn `forge:tdd` with model **`opus`** to author e2e spec files from the ack block (web → `tests/e2e/<slug>.e2e-web.spec.ts`). Implementation (Step 6 delegate) makes them GREEN. After Step 6 returns, GREEN loop dispatches per flavor: **web** → `forge:e2e-web --run` (which dispatches `test-runner` sonnet with `type=e2e-web`); **backend** → raw `test-runner` agent **`sonnet`**. Both: `mode=report` then `mode=fix` (max 3). Still failing → halt; do NOT proceed to Step 7. Full contract + interaction with Step 8.5: see `references/e2e-tdd-loop.md`.
+Detect: ticket body has `## E2E coverage` with `required: yes | web | backend | mobile`. Absent / `required: no` → skip. Resolve flavor against `<project>/.claude/tracker.json` `platforms[]` (default `backend` when absent). RED phase: spawn `forge:tdd` with model **`opus`** to author e2e spec files from the ack block (web → `tests/e2e/<slug>.e2e-web.spec.ts`). Implementation (Step 6 delegate) makes them GREEN. After Step 6 returns, GREEN loop dispatches per flavor: **web** → `forge:e2e-web --run` (which dispatches `test-runner` sonnet with `type=e2e-web`); **backend** → `forge:e2e --run` (DB-isolated: provisions a throwaway DB, runs the suite via `test-runner` **`sonnet`**, tears down). Both: `mode=report` then `mode=fix` (max 3). Still failing → halt; do NOT proceed to Step 7. Full contract + interaction with Step 8.5: see `references/e2e-tdd-loop.md`.
 
 ### 7. Run linter
 
@@ -80,9 +80,9 @@ Read `CLAUDE.md > ## Essential commands`. Look for `Typecheck` row (preferred) o
 
 Spawn `test-runner` agent with **`sonnet`** model, `mode=report` first, `path_filter` = relevant test dir. Pass → continue. Fail → spawn again with `mode=fix`, `max_fix_iterations=3`; then one more `mode=report`. Still failing → halt + report; do NOT commit.
 
-### 8.5. Run e2e (if opted in)
+### 8.5. Run e2e regression (if opted in)
 
-If `<project>/.claude/e2e.json` exists with `db_isolation` other than `"none"`: invoke `forge:e2e <ticket-ref>`. On success → continue. On halt → halt `forge:execute-ticket`; do NOT commit; do NOT mark done.
+Complementary to Step 6.5: that step green-loops the NEW ack-derived specs (scoped); this step runs the FULL e2e suite under DB isolation as a final regression. If `<project>/.claude/e2e.json` opts in (`db_isolation` other than `"none"`): invoke `forge:e2e --run` (full suite). On success → continue. On halt → halt `forge:execute-ticket`; do NOT commit; do NOT mark done.
 
 ### 9. Generate manual test cases
 

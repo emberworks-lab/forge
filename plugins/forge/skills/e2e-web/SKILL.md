@@ -8,7 +8,7 @@ type: hybrid
 
 Web-side end-to-end testing for forge projects. Runs Playwright specs (`**/*.e2e-web.spec.ts`) against the project, gates `forge:epic-close`, and is the auto-installer when `forge:project-init` selects the web-nextjs Playwright module.
 
-A future `forge:e2e` (backend) will mirror this shape so the two stay symmetric.
+Its sibling `forge:e2e` (backend) mirrors this shape so the two stay symmetric.
 
 ## Convention
 
