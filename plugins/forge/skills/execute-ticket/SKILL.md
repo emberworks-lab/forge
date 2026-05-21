@@ -66,7 +66,7 @@ Detect ticket type and delegate. For FORGE-N config-only tickets → ad-hoc suba
 
 ### 6.5. E2E TDD loop (if ack opts in)
 
-Detect: ticket body has `## E2E coverage` with `required: yes | web | backend | mobile`. Absent / `required: no` → skip. Resolve flavor against `<project>/.claude/tracker.json` `platforms[]` (default `backend` when absent). RED phase: spawn `forge:tdd` with model **`opus`** to author e2e spec files from the ack block. Implementation (Step 6 delegate) makes them GREEN. After Step 6 returns, GREEN loop: spawn `test-runner` agent with model **`sonnet`**, `mode=report` then `mode=fix` (max 3) on the e2e spec dir. Still failing → halt; do NOT proceed to Step 7. Full contract + interaction with Step 8.5: see `references/e2e-tdd-loop.md`.
+Detect: ticket body has `## E2E coverage` with `required: yes | web | backend | mobile`. Absent / `required: no` → skip. Resolve flavor against `<project>/.claude/tracker.json` `platforms[]` (default `backend` when absent). RED phase: spawn `forge:tdd` with model **`opus`** to author e2e spec files from the ack block (web → `tests/e2e/<slug>.e2e-web.spec.ts`). Implementation (Step 6 delegate) makes them GREEN. After Step 6 returns, GREEN loop dispatches per flavor: **web** → `forge:e2e-web --run` (which dispatches `test-runner` sonnet with `type=e2e-web`); **backend** → raw `test-runner` agent **`sonnet`**. Both: `mode=report` then `mode=fix` (max 3). Still failing → halt; do NOT proceed to Step 7. Full contract + interaction with Step 8.5: see `references/e2e-tdd-loop.md`.
 
 ### 7. Run linter
 
