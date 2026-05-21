@@ -12,9 +12,9 @@ required: <yes | web | backend | mobile>
 scope: <prose>
 ```
 
-- `required: yes` → use the project's **default** e2e flavor (see qualifier resolution below).
-- `required: web` → web e2e flavor (Playwright / etc — wired by EPIC H).
-- `required: backend` → backend HTTP / API e2e flavor.
+- `required: yes` → use the project's **default** e2e flavor (see qualifier resolution below). Alias for `backend` when `platforms[]` is missing.
+- `required: web` → web e2e flavor (Playwright). Specs go to `tests/e2e/<feature-slug>.e2e-web.spec.ts`; GREEN loop runs via `forge:e2e-web --run`.
+- `required: backend` → backend HTTP / API e2e flavor. Explicit alias for `yes` on backend-only projects. GREEN loop runs via raw `test-runner` agent (no per-flavor wrapper yet).
 - `required: mobile` → mobile e2e flavor (research; may halt as "no consumer wired yet").
 
 ## Qualifier resolution
@@ -37,7 +37,13 @@ Spawn `forge:tdd` with model **`opus`** (creative — generates test cases from 
 - The resolved e2e-flavor (`backend` | `web` | `mobile`).
 - The touched-file scope hint from the plan (Mode A doc, Mode B-a `## Files`, or inferred from `## Steps`).
 
-Expected return: one or more spec files written under the project's e2e test directory (per the flavor's conventions). Each spec MUST start in RED — assertions for behavior that does not yet exist. The skill itself enforces "watch it fail for the right reason" before returning.
+Per-flavor spec target:
+
+- `backend` → project's backend e2e test dir (per `.claude/e2e.json` or framework default).
+- `web` → `tests/e2e/<feature-slug>.e2e-web.spec.ts` (Playwright). Feature-slug derives from the ticket title (kebab-case).
+- `mobile` → halt; no consumer wired yet.
+
+Expected return: one or more spec files written under the resolved path. Each spec MUST start in RED — assertions for behavior that does not yet exist. The skill itself enforces "watch it fail for the right reason" before returning.
 
 If `forge:tdd` returns `BLOCKED` or `NEEDS_CONTEXT` → relay to the user with the original message; halt.
 
@@ -45,14 +51,22 @@ If `forge:tdd` returns `BLOCKED` or `NEEDS_CONTEXT` → relay to the user with t
 
 Continue with Step 6 as documented (delegate to `forge:subagent-driven-development`). The subagents now have a clear definition of done: the new RED specs must turn GREEN. The orchestrator notes that the RED specs from 6.5.1 ARE the contract for this implementation phase, and forwards them as plan context.
 
-### 6.5.3 — GREEN: loop e2e tests via `test-runner` agent
+### 6.5.3 — GREEN: loop e2e tests (per-flavor consumer)
 
-After the implementation phase returns DONE, spawn `test-runner` agent with model **`sonnet`** (mechanical):
+After the implementation phase returns DONE, dispatch the GREEN loop based on resolved flavor.
 
-- `mode=report` first, `path_filter` = the e2e spec dir for the resolved flavor.
+**Web flavor** (`required: web`): invoke `forge:e2e-web --run` with `cwd` = project root, `path_filter` = the spec dir / file(s) written in 6.5.1, `mode=report` first. The skill dispatches `test-runner` (model: **`sonnet`**) with `type=e2e-web` internally.
+
+- Pass → continue to Step 7 (lint).
+- Fail → invoke `forge:e2e-web --run` again with `mode=fix` (skill caps `max_fix_iterations=3`). Then one more `mode=report` to confirm GREEN.
+- Still failing → halt with `e2e-tdd-loop-failed: web specs did not reach GREEN after fix iterations`; do NOT continue to Step 7; do NOT commit.
+
+**Backend flavor** (`required: backend` or `yes`-resolved-to-backend): spawn `test-runner` agent directly with model **`sonnet`** (no per-flavor wrapper yet).
+
+- `mode=report` first, `path_filter` = the e2e spec dir for backend.
 - Pass → continue to Step 7 (lint).
 - Fail → spawn `test-runner` again with `mode=fix`, `max_fix_iterations=3`. Then one more `mode=report` to confirm GREEN.
-- Still failing → halt with `e2e-tdd-loop-failed: <flavor> specs did not reach GREEN after fix iterations`; do NOT continue to Step 7; do NOT commit.
+- Still failing → halt with `e2e-tdd-loop-failed: backend specs did not reach GREEN after fix iterations`; do NOT continue to Step 7; do NOT commit.
 
 ## Interaction with Step 8.5 (existing e2e runner)
 

@@ -1,0 +1,44 @@
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  // Directory where test files live
+  testDir: './tests/e2e',
+
+  // Match only *.e2e-web.spec.ts files (forge convention)
+  testMatch: '**/*.e2e-web.spec.ts',
+
+  // Run each test file in parallel; serial within a file
+  fullyParallel: true,
+
+  // Fail the build on CI if you accidentally left test.only
+  forbidOnly: !!process.env.CI,
+
+  // Retry twice on CI; no retries locally
+  retries: process.env.CI ? 2 : 0,
+
+  // One worker on CI to avoid resource contention; auto locally
+  workers: process.env.CI ? 1 : undefined,
+
+  reporter: process.env.CI ? 'github' : 'html',
+
+  use: {
+    // Base URL — override via BASE_URL env var in CI
+    baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
+
+    // Collect trace on first retry for debugging
+    trace: 'on-first-retry',
+  },
+
+  // Chromium-only by default (fastest local feedback; add firefox/webkit when needed)
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+  ],
+
+  // Start the Next.js dev server automatically before running tests
+  webServer: {
+    command: 'pnpm dev',
+    url: process.env.BASE_URL ?? 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
+  },
+});

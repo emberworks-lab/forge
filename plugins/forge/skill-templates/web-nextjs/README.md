@@ -27,6 +27,23 @@ These are available as ready-to-follow guides in `_common/manual-setup-templates
 | Analytics / events | *(add your own)* |
 | i18n | *(add your own)* |
 
+## Opt-in modules
+
+See `OPT_IN_MODULES.md` for the full list. Quick reference:
+
+### Playwright (end-to-end testing)
+
+Full setup guide: `plugins/forge/skill-templates/_common/manual-setup-templates/playwright.md`
+
+1. Install: `pnpm add -D @playwright/test && npx playwright install`
+2. Copy `playwright.config.ts.template` → `playwright.config.ts` (webServer points at `pnpm dev`, Chromium-only by default per the #79 audit recommendation)
+3. Copy `tests/e2e/example.e2e-web.spec.ts.template` → `tests/e2e/example.e2e-web.spec.ts`
+4. Add to `package.json` scripts: `"test:e2e": "playwright test"`, `"test:e2e:ui": "playwright test --ui"`
+5. Add to `.gitignore`: `playwright-report/`, `test-results/`
+6. Create `.claude/e2e-web.json` opt-in marker (see guide) to activate `forge:e2e-web`
+
+Runtime invocation once set up: `forge:e2e-web` (`plugins/forge/skills/e2e-web/SKILL.md`, issue #80)
+
 ## Quick start
 
 ```bash

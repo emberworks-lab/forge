@@ -59,16 +59,13 @@ Show the composed body in chat (one block). Ask: "ОК, створюю? або �
 
 ### 3.5 E2E injection (optional)
 
-Read `<project>/.claude/e2e.json`. If the file exists AND `opted_in: true` AND `--no-e2e` was NOT passed:
+Two independent branches; both may coexist. Skip a branch when its file is absent, `opted_in ≠ true`, or `--no-e2e` is passed.
 
-Append to the ticket body (after all other sections):
-```markdown
-## E2E coverage
-required: yes
-scope: <short prose — happy path + notable edge cases, derived from title + acceptance criteria>
-```
+**Backend** — `<project>/.claude/e2e.json` opted in → append:
+`## E2E coverage` / `required: yes` / `scope: <sonnet, ≤ 15 words>`
 
-Generate `scope` inline using **sonnet** (best-effort, ≤ 15 words). Skip if `--no-e2e` is passed, `e2e.json` is absent, or `opted_in` is not `true`.
+**Web** — `<project>/.claude/e2e-web.json` opted in + area is **web** (title contains "web" / label `area:web` / `--area web` flag) → append after backend block:
+`## E2E coverage required: web` / `scope: <sonnet, ≤ 15 words>`
 
 ### 4. Ensure labels exist
 

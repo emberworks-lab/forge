@@ -28,12 +28,13 @@ Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. Re-run, don'
 
 - Spawn `linter-runner` agent (`mode=report`, no path filter) — model **`sonnet`**.
 - Spawn `test-runner` agent (`mode=report`, full suite) — model **`sonnet`**.
+- **Web e2e per platform.** Read `<project>/.claude/tracker.json` → `platforms[]` per `plugins/forge/docs/conventions/tracker-json.md` §4 reader algorithm. For each platform whose name matches `web*` (or whose `path/package.json` lists `next` / `react` / `vite` / `astro`) AND has `<platform.path>/.claude/e2e-web.json` present with `opted_in: true`: invoke `forge:e2e-web --run` with `cwd=<platform.path>`, `mode=report` (full suite, no `path_filter`). The skill dispatches the `test-runner` agent — model **`sonnet`** — with `type=e2e-web`. Platforms without the opt-in marker, or with `opted_in: false`, are skipped silently. If `platforms[]` is absent, treat the repo root as the single default platform and apply the same marker check.
 
-Read agent outputs in this turn. If either fails:
+Read all agent outputs in this turn. If linter, unit tests, or any web e2e run fails:
 
-> "EMB-X tests-pass gate FAILED. Lint: <count> / Tests: <count>. Snippet: <first failure>. No close actions until clean. Fix and re-run, OR `/execute-epic --start-from <ticket>`."
+> "EMB-X tests-pass gate FAILED. Lint: <count> / Tests: <count> / E2E-web: <platform:count>. Snippet: <first failure>. No close actions until clean. Fix and re-run, OR `/execute-epic --start-from <ticket>`."
 
-Halt. If both pass → continue.
+Halt. If all pass → continue.
 
 #### 0c. Manual-test confirmation
 
