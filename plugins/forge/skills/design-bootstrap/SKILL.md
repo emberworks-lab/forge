@@ -12,7 +12,7 @@ Determine and record how a new project relates to a design system, so downstream
 
 Invoked by `/forge:project-init` once a **frontend platform** is detected in the stack interview (any `platforms[]` entry whose stack key is web-frontend, mobile-flutter, mobile-native, etc.). Standalone invocation `/forge:design-bootstrap` is also valid on an existing project to retroactively record the decision.
 
-> Wiring: `/forge:project-init` SHOULD call this skill as a sub-step right after the per-platform CLAUDE.md is written (step 4.5 in multi-platform mode, or after step 5 in single-platform mode). The actual wiring lives in a separate ticket — this skill's contract below tells the wirer what to invoke and what artifacts to expect.
+> Wiring: `/forge:project-init` calls this skill at its step 7.7 — after both `tracker.json` (step 7.25) and CLAUDE.md (step 5 / 4.5) exist, since branch (a) writes to `tracker.json` and branch (c) opens an epic via the tracker backend. The contract below tells the wirer what to invoke and what artifacts to expect.
 
 ## Contract
 
@@ -86,7 +86,7 @@ Wait for the user's letter. No multi-select.
 - Do not invent a Figma URL the user did not supply (branch a). Leave `figma_file_url: null` if the source is a non-Figma library.
 - Do not pre-populate `tokens.json` with real values (branch c). The stub is a placeholder for the future build-out, not a starting palette.
 - Do not skip the `forge:create-epic` invocation in branch (c). The parking-lot epic is the whole point — a `design/` folder with no tracking attached gets forgotten.
-- Do not modify `forge:project-init` from here. Wiring is a separate ticket.
+- Do not modify `forge:project-init` from here. The wiring lives in `forge:project-init` step 7.7.
 
 ## What this skill does not cover
 
