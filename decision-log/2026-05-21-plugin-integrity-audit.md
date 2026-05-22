@@ -81,6 +81,32 @@ These appear only in `docs/design-research/` artifacts (#74 candidate-skills, #8
 
 ---
 
+## Resolution log (Phase 3 — 2026-05-22)
+
+**P0 — all resolved.** #1/#2 built as forge skills (not repointed at superpowers — forbidden by audit check 6); #3 e2e built then split into parent+children; #4 kit-update-docs built then split into update-docs parent+children.
+
+**P1 — all migrated (user decision: migrate all three):**
+- `forge:improve-codebase-architecture` — migrated (adapted from mattpocock, `inspired-by`). Resolves the diagnose handoff phantom.
+- `forge:log-decision` — migrated (original; matches docs-workflow decisions-log format). Resolves the docs-workflow + scaffold phantom.
+- `forge:manual-cases-list` — migrated as the on-demand counterpart to execute-epic Step 7; backend-aware via tracker recipe.
+
+**P2 — user decision: migrate `to-prd`, retire the rest:**
+- `forge:to-prd` — migrated (adapted from mattpocock); backend-agnostic publish (markdown → `docs/0X_*.md`); output feeds create-ticket Mode A.
+- `triage` — **retired** (user: "не потрібен"). Was Linear-coupled inbox triage; not core to the execution pipeline.
+- `review-fix` — **retired**: superseded by `forge:review` (JSON) + epic-close classifier + Step 6 action execution.
+- `to-issues` — **retired**: covered by `forge:create-epic` / `forge:create-ticket`.
+- `memory-audit` — **retired from the plugin**: personal-infra (`~/.claude-memory/`), not product-engineering; doesn't belong in a distributable plugin. Recreate as a personal `~/.claude/commands/` command if wanted.
+
+All four retired commands had zero remaining references in the plugin (verified) — pure capability removal, no dangling links.
+
+**Audit C — encapsulation: 1 violation found + fixed.**
+- `forge:execute-ticket` Step 11 + `forge:execute-epic` `references/subagent-prompt.md` inlined the commit recipe (phrase + message + footer + staging) instead of invoking `forge:commit` — whose own description already claimed to be invoked by them. Fixed: Step 11 now invokes `forge:commit` (`kind=implements`) then pushes (commit doesn't push); the subagent prompt now points at Step 11 instead of restating the recipe.
+- Everything else composes correctly. The only unresolved `forge:*` references are intentional `forge:e2e-mobile*` future-skill sketches (documented as not-yet-built).
+
+**Net plugin state:** 43 skills, all pass `audit.sh`. No active phantom references remain.
+
+---
+
 ## E2E architecture — parent/child split (user decision)
 
 Initial P0 fix built `forge:e2e` as the backend skill (sibling of `forge:e2e-web`). User pushed back: that's the wrong shape for a system that will grow web + backend + mobile (and mobile further into flutter/rn/kmp/native + device target). Restructured to a composition hierarchy:

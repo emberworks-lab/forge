@@ -94,7 +94,7 @@ Invoke `forge:verification-before-completion` against the about-to-claim DONE st
 
 ### 11. Commit (if `--commit`)
 
-Default NO COMMIT when standalone. When invoked from `forge:execute-epic` (`--commit` implied): stage + commit. **commit_close_phrase via backend recipe** with `kind=implements`. Message: `<phrase>: <ticket title lowercase>` then `Co-Authored-By: <model footer per plugins/forge/docs/conventions/git-workflow.md>`. Push the branch (first push of a new branch needs `--set-upstream`): `git push -u origin "$(git rev-parse --abbrev-ref HEAD)" 2>&1 | tail -1`. If push fails, warn and continue.
+Default NO COMMIT when standalone. When invoked from `forge:execute-epic` (`--commit` implied): invoke `forge:commit` with this ticket's ref + `kind=implements` — it reads the backend from `tracker.json`, composes the magic-word phrase + subject + co-author footer, and stages safely (never secrets). `forge:commit` does NOT push; after it returns, push the branch (first push of a new branch needs `--set-upstream`): `git push -u origin "$(git rev-parse --abbrev-ref HEAD)" 2>&1 | tail -1`. If push fails, warn and continue.
 
 ### 11.5. Mark ticket Done
 
