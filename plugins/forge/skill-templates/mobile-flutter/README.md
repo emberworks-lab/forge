@@ -34,7 +34,7 @@ Not done yet. When the second Flutter project lands (Volatilance mobile?), we ex
 ## What lives elsewhere
 
 - `kit-add-content.md` (Embergard JSON content schema) — stays project-local; not generalizable
-- `kit-update-docs.md` — global, in `~/.claude/commands/`
+- `update-docs.md` — global, in `~/.claude/commands/`
 - tracker skills (`/create-epic`, `/execute-epic`, etc.) — global
 
 ## Linked global rules

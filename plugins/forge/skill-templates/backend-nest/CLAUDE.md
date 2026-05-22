@@ -11,6 +11,15 @@
   Never accept raw untyped request bodies.
 - **Secrets**: read exclusively from `process.env`. Never hard-code credentials.
 
+## API documentation (Swagger-first)
+
+OpenAPI/Swagger is the default, priority approach for API reference docs. `forge:update-docs-api --init` asks once whether to enable it:
+
+- **Enabled** (`.claude/api-docs.json` → `{ "openapi": true }`): `npm run docs:api` boots the app, writes `openapi.json`, and renders it to `docs/api/endpoints.md` (Markdown source). An interactive HTML view (Swagger UI / Redoc) is generated from the same `openapi.json` — never hand-written.
+- **Disabled** (`{ "openapi": false }`): `docs/api/endpoints.md` is hand-maintained Markdown; no generator runs.
+
+**Mandatory when Swagger is enabled:** every controller route and DTO MUST carry `@nestjs/swagger` decorators (`@ApiTags`, `@ApiOperation`, `@ApiResponse`, `@ApiProperty`, …). An undocumented route produces an incomplete `openapi.json` and therefore incomplete docs — reviewers reject it. Markdown is always the committed source; HTML is generated, never edited by hand.
+
 ## Doc-sync rule (enforced)
 
 Every PR that changes a **controller**, **exception**, or **gateway** MUST also

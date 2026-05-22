@@ -127,13 +127,13 @@ Copy `plugins/forge/skill-templates/_common/owner-overview.md` to `<project>/doc
 | `{{ project_name }}` | project name from step 2 |
 | `{{ one_paragraph_elevator_pitch }}` | elevator-pitch answer collected during the interview; if not asked, prompt now: "One-sentence elevator pitch for this project?" |
 | `{{ platform_1_name }}` / `{{ platform_2_name }}` | project type / platforms from step 2 |
-| `{{ prefix }}` / `{{ ticket_prefix }}` | from `tracker.json` `prefix` field (written in step 7.25) — substitute after step 7.25 or leave the literal placeholder if tracker step has not run yet; the next `kit-update-docs` run fills it |
+| `{{ prefix }}` / `{{ ticket_prefix }}` | from `tracker.json` `prefix` field (written in step 7.25) — substitute after step 7.25 or leave the literal placeholder if tracker step has not run yet; the next `update-docs` run fills it |
 | `{{ tracker_backend }}` | from `tracker.json` `backend` field (same timing note) |
 | `{{ commit_magic_word_example }}` | derived from backend (`Refs PREFIX-N:` for Linear, `Refs #N:` for GitHub, `Refs <slug>:` for Markdown) |
 
 Sections inside `<!-- manual --> ... <!-- /manual -->` guards: replace the inner example-italics placeholder text with an empty line so the user sees a clean prompt area, but keep the guard tags themselves in place.
 
-Sections inside `<!-- auto:<key> --> ... <!-- /auto:<key> -->` guards: leave the placeholder stub lines untouched — `/forge:kit-update-docs` replaces those blocks on first epic close.
+Sections inside `<!-- auto:<key> --> ... <!-- /auto:<key> -->` guards: leave the placeholder stub lines untouched — `/forge:update-docs` replaces those blocks on first epic close.
 
 Create `<project>/docs/` if it does not exist. Do not overwrite an existing `owner-overview.md` without explicit user confirmation.
 

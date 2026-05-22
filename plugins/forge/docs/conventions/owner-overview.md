@@ -1,6 +1,6 @@
 # Owner-overview format spec
 
-> Authoritative spec for `docs/owner-overview.md` — the single-page project snapshot every project gets. Defines section order, guard semantics, update lifecycle, and the contract between `/forge:project-init` (scaffolds) and `/forge:kit-update-docs` (refreshes).
+> Authoritative spec for `docs/owner-overview.md` — the single-page project snapshot every project gets. Defines section order, guard semantics, update lifecycle, and the contract between `/forge:project-init` (scaffolds) and `/forge:update-docs` (refreshes).
 >
 > Canonical template: [`plugins/forge/skill-templates/_common/owner-overview.md`](../../skill-templates/_common/owner-overview.md).
 
@@ -34,7 +34,7 @@ Never per-platform copies. The owner reads one file.
 
 **≤ 300 lines total**, including placeholders, guards, and blank lines.
 
-Why a hard cap: this is a digest, not a spec. If a section grows past its slot, the content belongs in `docs/00_meta/` or a per-feature spec instead. `/forge:kit-update-docs` aborts regeneration and asks the user to prune if the rendered output exceeds 300 lines.
+Why a hard cap: this is a digest, not a spec. If a section grows past its slot, the content belongs in `docs/00_meta/` or a per-feature spec instead. `/forge:update-docs` aborts regeneration and asks the user to prune if the rendered output exceeds 300 lines.
 
 ---
 
@@ -49,7 +49,7 @@ Why a hard cap: this is a digest, not a spec. If a section grows past its slot, 
 | 5 | Libraries & tools | Auto + Manual | Package manifests + `.mcp.json` + `.claude/settings.json`; manual "why" notes preserved |
 | 6 | Conventions cheatsheet | Auto | `CLAUDE.md` + `.claude/tracker.json` + `plugins/forge/docs/conventions/` |
 
-Sections must appear in this order. `/forge:kit-update-docs` re-emits them in order; out-of-order sections in the existing file are reordered.
+Sections must appear in this order. `/forge:update-docs` re-emits them in order; out-of-order sections in the existing file are reordered.
 
 ---
 
@@ -59,7 +59,7 @@ Two guard types delimit regions in the file:
 
 ### `<!-- manual --> ... <!-- /manual -->`
 
-User-owned. `/forge:kit-update-docs` **never** overwrites content between these guards. If the surrounding section is regenerated, the manual block is lifted out, the rest is rewritten, then the manual block is reinserted at the same relative position.
+User-owned. `/forge:update-docs` **never** overwrites content between these guards. If the surrounding section is regenerated, the manual block is lifted out, the rest is rewritten, then the manual block is reinserted at the same relative position.
 
 Used for:
 
@@ -71,7 +71,7 @@ Used for:
 
 ### `<!-- auto:<key> --> ... <!-- /auto:<key> -->`
 
-Agent-owned. `/forge:kit-update-docs` replaces the entire block on every run. The `<key>` is a stable identifier (`features.shipped`, `phases.active`, `tech_stack`, `libraries`, etc.) so the updater can target specific blocks without re-parsing the whole file.
+Agent-owned. `/forge:update-docs` replaces the entire block on every run. The `<key>` is a stable identifier (`features.shipped`, `phases.active`, `tech_stack`, `libraries`, etc.) so the updater can target specific blocks without re-parsing the whole file.
 
 Used for:
 
@@ -92,12 +92,12 @@ Manual guards may appear inside an auto-section (e.g. a free-form note inside `#
 | Event | Action | Skill |
 |---|---|---|
 | Project bootstrap | File scaffolded from canonical template with placeholders filled from project-init answers | `/forge:project-init` |
-| Epic closed | Sections 2 (Shipped + In progress) + 3 (Active phase) refreshed from tracker state | `/forge:kit-update-docs` (invoked by `/forge:epic-close`) |
-| Dependency added / removed | Section 4 (Tech stack) + Section 5 (Libraries) refreshed | `/forge:kit-update-docs` (invoked manually or by post-install hook) |
-| Milestone changed | Section 3 (Active + Upcoming) refreshed from `roadmap.md` | `/forge:kit-update-docs` |
+| Epic closed | Sections 2 (Shipped + In progress) + 3 (Active phase) refreshed from tracker state | `/forge:update-docs` (invoked by `/forge:epic-close`) |
+| Dependency added / removed | Section 4 (Tech stack) + Section 5 (Libraries) refreshed | `/forge:update-docs` (invoked manually or by post-install hook) |
+| Milestone changed | Section 3 (Active + Upcoming) refreshed from `roadmap.md` | `/forge:update-docs` |
 | Manual edit | User edits anything (typically inside `<!-- manual -->` guards) | n/a — guards preserve it |
 
-`/forge:kit-update-docs` is the single entry point for non-manual updates. It is idempotent — running it twice with no source changes produces no diff.
+`/forge:update-docs` is the single entry point for non-manual updates. It is idempotent — running it twice with no source changes produces no diff.
 
 ---
 
@@ -113,9 +113,9 @@ The template uses `{{ snake_case_placeholder }}` for values populated at scaffol
 | `{{ tracker_backend }}` | `.claude/tracker.json` `backend` field |
 | `{{ commit_magic_word_example }}` | derived from backend (see `plugins/forge/docs/tracker-backends/<backend>.md`) |
 | `{{ platform_1_name }}` etc. | project-init Q2 (project type) |
-| Other `{{ ... }}` | populated by `/forge:kit-update-docs` from tracker / repo state |
+| Other `{{ ... }}` | populated by `/forge:update-docs` from tracker / repo state |
 
-Unsubstituted placeholders are a smell — `/forge:kit-update-docs` flags any `{{ ... }}` that remains after a refresh as a TODO.
+Unsubstituted placeholders are a smell — `/forge:update-docs` flags any `{{ ... }}` that remains after a refresh as a TODO.
 
 ---
 

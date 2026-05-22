@@ -153,12 +153,18 @@ When a triggering event happens, the listed files **all** get updated in the sam
 
 ---
 
-## How `/log-decision` and `/kit-update-docs` interact
+## Source format: Markdown is canonical, HTML is generated
+
+- **Source-of-truth docs are always Markdown** (plus `openapi.json` / `asyncapi.yaml` for API specs). MD is git-diffable for PR review, readable by AI agents as context, and safely editable in `<!-- auto:<key> -->` guard blocks.
+- **HTML is a generated presentation layer, never authored or edited by hand.** Polished/interactive views are rendered from MD or specs — Swagger UI / Redoc from `openapi.json`, AsyncAPI HTML from `asyncapi.yaml`, or an MD→site build (MkDocs / Docusaurus) for prose. Those outputs are build artifacts, not committed source-of-truth.
+- The `forge:update-docs` skills never write HTML.
+
+## How `/log-decision` and `forge:update-docs` interact
 
 - **`/log-decision`** appends an entry to `00_meta/decisions-log.md` via a guided 30-second flow. It optionally updates the relevant design doc and `glossary.md` in the same step when the decision introduces a new term or supersedes a prior choice. Use it whenever a non-trivial decision crystallises during a session — the rationale must outlive the chat.
-- **`/kit-update-docs`** (project-local) syncs the project's `docs/` with recent code changes. It analyses the diff, identifies stale docs, and applies targeted edits. Run it when finishing a branch or after a stack-touching change. The skill respects the rules in this file — append to `decisions-log.md`, update `roadmap.md` deferred entries, refresh `glossary.md` for new terms.
+- **`forge:update-docs`** is the after-implementation sweep — a router that analyses the epic's scope and dispatches to per-type children: `update-docs-meta` (owner-overview + this `00_meta/` registry set), `update-docs-api` (backend API reference), `update-docs-design` (design / ADR drift detection). It runs nothing whose domain the epic didn't touch. Children respect the rules in this file — append to `decisions-log.md`, update `roadmap.md` deferred entries, refresh `glossary.md`.
 
-Both skills are entry points into the same workflow. `/log-decision` is for the moment a decision locks; `/kit-update-docs` is for catching up specs after implementation.
+Both are entry points into the same workflow. `/log-decision` is for the moment a decision locks; `forge:update-docs` is for catching up docs after implementation.
 
 ---
 

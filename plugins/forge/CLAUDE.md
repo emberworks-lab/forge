@@ -87,8 +87,9 @@ When `forge:epic-close` finalizes an epic in a project that has
 and Phases sections MUST be refreshed to reflect the just-closed
 epic. `<!-- manual -->` guarded sections are preserved verbatim.
 
-The mechanical refresher lives in `forge:kit-update-docs` (pending
-skill implementation). Until that skill exists, refresh is a
-manual TODO surfaced by `forge:epic-close`'s DRY comment step.
+The mechanical refresher is `forge:update-docs` (the router) → its
+`forge:update-docs-meta` child, invoked by `forge:epic-close` with
+`--epic <ref>`. The meta child refreshes only the `<!-- auto:<key> -->`
+blocks; `<!-- manual -->` content is preserved.
 
 Full spec: `forge/docs/conventions/owner-overview.md`
