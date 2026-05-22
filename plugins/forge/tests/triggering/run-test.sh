@@ -86,13 +86,33 @@ cp "$PROMPT_FILE" "${OUTPUT_DIR}/prompt.txt"
 printf 'Running claude -p (stream-json)...\n'
 # `|| true` prevents set -e from aborting on non-zero claude exit; we evaluate
 # the log ourselves.
-timeout 300 claude \
-    -p "$PROMPT" \
-    --plugin-dir "$FORGE_PLUGIN_DIR" \
-    --dangerously-skip-permissions \
-    --max-turns "$MAX_TURNS" \
-    --output-format stream-json \
-    > "$LOG_FILE" 2>&1 || true
+#
+# Three portability/correctness requirements, each learned the hard way:
+#   1. `--verbose` is REQUIRED for `--print --output-format stream-json` to emit
+#      streaming events. Without it the log is empty and every test FAILs.
+#   2. GNU `timeout` is absent on stock macOS (so is `gtimeout` unless coreutils
+#      is brew-installed). Use whichever exists; if neither, run without an outer
+#      timeout — `--max-turns` still bounds the session.
+#   3. Run from a throwaway cwd so a "doing" skill (commit / execute-ticket)
+#      triggered headless cannot mutate the real working tree. We only need the
+#      Skill tool-use event, which fires before the skill acts on anything.
+CLAUDE_ARGS=(
+    -p "$PROMPT"
+    --plugin-dir "$FORGE_PLUGIN_DIR"
+    --dangerously-skip-permissions
+    --max-turns "$MAX_TURNS"
+    --output-format stream-json
+    --verbose
+)
+WORK_DIR="$(mktemp -d)"
+if command -v timeout >/dev/null 2>&1; then
+    ( cd "$WORK_DIR" && timeout 300 claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+elif command -v gtimeout >/dev/null 2>&1; then
+    ( cd "$WORK_DIR" && gtimeout 300 claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+else
+    ( cd "$WORK_DIR" && claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+fi
+rm -rf "$WORK_DIR"
 
 printf '\n=== Results ===\n'
 
