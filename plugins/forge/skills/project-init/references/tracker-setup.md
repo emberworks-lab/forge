@@ -76,6 +76,35 @@ After `setup_interview` writes `tracker.json`, call `ensure_labels` via the line
    ```
 5. Call `ensure_labels` via the github recipe — once per repo when `epics_repo` is set.
 
+### Polyrepo wiring (when `structure == "polyrepo"`)
+
+Applies **on top of** `github-personal` / `github-org`. The general/parent repo
+is the tracker home. At this step (7.25) the repos do not exist yet — they are
+created in step 7.9 (`references/polyrepo-setup.md`) — so do GitHub-side repo
+work there, not here.
+
+1. **Skip `gh repo view` auto-detection.** The repo names come from interview
+   step 2d: the general repo name and each `platforms[].repo`.
+2. **Create the GitHub Project** (`gh project create`) — Projects v2 do not need a
+   repo to exist. Capture `project_number`.
+3. **Write the root `tracker.json`** with:
+   ```jsonc
+   {
+     "backend": "github",
+     "structure": "polyrepo",
+     "github": {
+       "org": "<org or user>",
+       "repo": "<general-repo-name>",
+       "epics_repo": "<general-repo-name>",
+       "project_number": <N>
+     },
+     "platforms": [ { "name": "...", "path": "...", "repo": "<platform repo>" } ]
+   }
+   ```
+4. **Defer to step 7.9:** repo creation + push, `linkProjectV2ToRepository` for
+   the general repo and every platform repo, and `ensure_labels` per repo. Do
+   **not** call `ensure_labels` here (no repos exist yet).
+
 ### `markdown`
 
 Ask: "Where should markdown tickets live? (default: `docs/00_meta/manual-tracker`) — press Enter to accept." Capture the answer; if blank, use `docs/00_meta/manual-tracker`.

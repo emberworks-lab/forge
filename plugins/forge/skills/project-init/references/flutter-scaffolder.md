@@ -87,6 +87,12 @@ If the scaffolder fails (non-zero exit), surface the error and **HALT** — do n
 
 Run after the scaffolder returns successfully.
 
+> **Multi-platform note.** This whole phase (git init + `gh repo create`) is for
+> single-platform Flutter projects. In any multi-platform run it is **skipped**:
+> `sub-folder` / `monorepo` keep one root repo, and `polyrepo` does per-repo git
+> setup uniformly for every platform at step 7.9 (`references/polyrepo-setup.md`).
+> See `references/scaffolding-logic.md` S2.2.
+
 ### 4A-flutter.5.1 — Git init
 
 ```bash

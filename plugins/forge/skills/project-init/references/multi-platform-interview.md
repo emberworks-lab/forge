@@ -38,8 +38,9 @@ Record the chosen set as `selected_platforms` (e.g. `["backend", "mobile-flutter
 Ask the user (single-select, **default: `sub-folder`**):
 
 > "Repo layout?
-> 1. **sub-folder** — each platform lives in its own sub-folder of the repo root (e.g. `backend/`, `mobile/`). Stable, recommended. **(default)**
-> 2. **monorepo** — nx / turborepo / melos workspace with shared tooling. **Experimental — many skills may behave imperfectly in this mode; expect to file bugs.**"
+> 1. **sub-folder** — each platform lives in its own sub-folder of the repo root (e.g. `backend/`, `mobile/`). One repo. Stable, recommended. **(default)**
+> 2. **monorepo** — one repo, nx / turborepo / melos workspace with shared tooling. **Experimental — many skills may behave imperfectly in this mode; expect to file bugs.**
+> 3. **polyrepo** — a separate git repo per platform, plus a general/parent repo (the project folder) that owns shared `docs/` and the tracker. **Experimental.**"
 
 Print the experimental warning **verbatim** when the user selects `monorepo`:
 
@@ -50,9 +51,18 @@ File bugs against emberworks-lab/forge when you hit them.
 Proceed with monorepo layout? (y/n)
 ```
 
-On `n` → fall back to `sub-folder`. On `y` → record `structure = "monorepo"` and continue.
+Print this warning **verbatim** when the user selects `polyrepo`:
 
-Record `structure` as `"sub-folder"` or `"monorepo"`.
+```
+WARNING: polyrepo layout is experimental. project-init builds it (general repo +
+one repo per platform + clone/pull scripts), but downstream skills (commit,
+pr-create, epic-close) are not yet polyrepo-aware — see EPIC L #124.
+Proceed with polyrepo layout? (y/n)
+```
+
+On `n` → fall back to `sub-folder`. On `y` → record the chosen `structure` and continue.
+
+Record `structure` as `"sub-folder"`, `"monorepo"`, or `"polyrepo"`.
 
 ## Step 2d — Per-platform path
 
@@ -72,6 +82,19 @@ Defaults:
 
 Strip any trailing slash. Validate that the paths are distinct across platforms.
 
+### Polyrepo only — repo names
+
+When `structure == "polyrepo"`, also ask:
+
+1. **General/parent repo name** (once):
+   > "Name for the general/parent repo (holds shared `docs/` + tracker)? Press Enter for default `<project>`."
+2. **Per-platform repo name**, for each entry in `selected_platforms`:
+   > "GitHub repo name for **<platform>**? Press Enter for default `<project>-<platform-short>` (e.g. `<project>-mobile`)."
+
+`<platform-short>` is `backend` / `web` / `mobile` derived from the platform key.
+Record the general repo name for tracker-setup (step 7.25) and store each
+per-platform repo name on the matching `platforms[]` entry as `repo`.
+
 ## Step 2e — Per-platform framework / runtime
 
 Loop through `selected_platforms` in the order the user picked them. For each, ask the **framework / runtime** question from `references/stack-interview-common.md §2` scoped to that platform.
@@ -88,6 +111,7 @@ For each answered platform, resolve the **stack key** via `references/skill-temp
 
 ```jsonc
 { "name": "<stack key>", "path": "<answer from 2d>" }
+// polyrepo: also add "repo": "<repo name from 2d>"
 ```
 
 Example after a backend + Flutter multi-platform interview:
@@ -105,8 +129,8 @@ The first entry is the primary / orchestrator platform (use the order the user p
 
 The multi-platform branch produces three artefacts for downstream steps:
 
-1. **`structure`** — `"sub-folder"` or `"monorepo"`.
-2. **`platforms[]`** — list of `{ name, path }` entries.
+1. **`structure`** — `"sub-folder"`, `"monorepo"`, or `"polyrepo"`.
+2. **`platforms[]`** — list of `{ name, path }` entries (plus `repo` when `polyrepo`).
 3. **`selected_stacks`** — same as `platforms[].name`, used by step 3 to resolve template paths for each platform.
 
 These flow into:
@@ -117,7 +141,8 @@ These flow into:
 
 ## Hard rules
 
-- Never silently default the user past the experimental-monorepo warning — always print it verbatim and require explicit `y`.
+- Never silently default the user past the experimental-monorepo **or polyrepo** warning — always print it verbatim and require explicit `y`.
+- Polyrepo records a general/parent repo name (once) plus a `repo` on every `platforms[]` entry — both are required for tracker-setup and the clone scripts.
 - Never combine `mobile` and `mobile-flutter` (or `mobile` and `mobile-native`) as separate entries — the more specific choice wins.
 - Never write `structure: "sub-folder"` to tracker.json explicitly when the default would do — readers default to `sub-folder` when the field is absent. Only write it when the user picked `monorepo`.
 - Single-platform projects do not pass through this file at all; they use the existing `stack-interview-common.md` batch.

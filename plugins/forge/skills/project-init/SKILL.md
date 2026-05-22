@@ -31,6 +31,7 @@ When the flow completes (full mode), the project has:
 10. `.claude/e2e-*.json` — per-platform e2e opt-in / opt-out markers, written by `forge:e2e --init` (step 7.6).
 11. Design posture — recorded by `forge:design-bootstrap` (step 7.7) when a frontend platform is present: one of a `design` block in `tracker.json`, a `## Design` block in CLAUDE.md, or a `design/` stub plus a parking-lot epic.
 12. `.claude/api-docs.json` — API docs opt-in marker, written by `forge:update-docs-api --init` (step 7.8) when a backend platform is present: `{ "openapi": true }` or `{ "openapi": false }`.
+13. Polyrepo only (`structure == "polyrepo"`) — general/parent repo + one git repo per platform created and pushed, `.gitignore` covering every platform path, and `scripts/{clone-all,pull-all}.sh` in the general repo. Written by step 7.9.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -208,6 +209,12 @@ Invoke `forge:design-bootstrap`, passing any Figma URL / tokens answer captured 
 
 Invoke `forge:update-docs-api --init`. It asks the user once whether to generate API docs from Swagger/OpenAPI or hand-write Markdown, then writes `.claude/api-docs.json` so the question is never re-asked. project-init does not ask the API docs question itself — `forge:update-docs-api --init` owns the prompt and marker write.
 
+### 7.9. Polyrepo repo creation (polyrepo only)
+
+> Skip entirely unless `structure == "polyrepo"` (also skip for `--tracker-only`, single-platform, `sub-folder`, `monorepo`).
+
+Follow `references/polyrepo-setup.md`: write the general repo's `.gitignore`, `git init` + `gh repo create` + push the general/parent repo and each platform repo, copy `scripts/{clone-all,pull-all}.sh`, then link every repo to the GitHub Project and run `ensure_labels` per repo. Runs **last** (before output) so each repo's initial commit captures the fully-scaffolded tree (docs, settings, tracker, e2e/design/API markers all already written). Choosing `polyrepo` in step 2c is the explicit consent the "do not `git init`" rule requires.
+
 ### 8. Output
 
 Print the summary block from `references/output-summary.md` — what was created, the stack summary, Linear prefix/team, and next steps.
@@ -218,7 +225,7 @@ Print the summary block from `references/output-summary.md` — what was created
 - Do not commit anything; the user reviews and commits when ready.
 - Do not configure secrets — that is a user responsibility, normally surfaced via a `manual-setup` Mode M ticket.
 - Do not assume stack from filenames alone; ask.
-- Do not run `git init` unless the user explicitly asked (the Flutter scaffolder branch is the only exception, and it's gated).
+- Do not run `git init` unless the user explicitly asked. Two gated exceptions: the Flutter scaffolder branch, and the `polyrepo` layout — choosing it in step 2c is consent, and the repos are created in step 7.9 (`references/polyrepo-setup.md`).
 - Do not auto-install dependencies; that is the user's environmental commitment.
 - Do not modify `plugins/forge/docs/` or `plugins/forge/skills/` during init. This skill writes to `plugins/forge/skill-templates/<stack>/` only with consent in step 4B.
 - Do not run `code-review-graph install --platform claude-code` — it is destructive (overwrites CLAUDE.md, injects upstream skills, adds hooks). Always write `.mcp.json` directly from the template in step 7.1.

@@ -16,7 +16,7 @@ Location: `<project-root>/.claude/tracker.json`
   "backend": "linear" | "github" | "markdown",
 
   // ── Project layout (optional; defaults shown) ────────────────────
-  "structure": "sub-folder" | "monorepo",
+  "structure": "sub-folder" | "monorepo" | "polyrepo",
   // Default: "sub-folder"
   //   sub-folder  — one or more platforms live in sub-folders of the
   //                 same repo root (e.g. backend/, mobile/).
@@ -24,12 +24,19 @@ Location: `<project-root>/.claude/tracker.json`
   //                 the workspace. Same resolution rules as sub-folder;
   //                 the distinction is advisory for humans and tooling
   //                 that needs to pick a package-manager strategy.
+  //   polyrepo    — each platform is its OWN git repo, nested in and
+  //                 .gitignore'd by a general/parent repo that owns the
+  //                 shared docs/ and the tracker. Same on-disk resolution
+  //                 rules as sub-folder; each platforms[] entry carries a
+  //                 `repo` field and github.epics_repo = the general repo.
+  //                 Experimental.
 
   "platforms": [
     {
       "name": "<platform identifier>",  // e.g. "backend-nest", "mobile-flutter"
-      "path": "<relative path from repo root>"
+      "path": "<relative path from repo root>",
                                         // "." for single-platform projects
+      "repo": "<github repo name>"      // polyrepo only — the platform's own repo
     }
     // ... additional platforms
   ],
@@ -64,6 +71,7 @@ Location: `<project-root>/.claude/tracker.json`
 |---|---|
 | `"sub-folder"` | Platforms are sub-folders of the same repo root. No special build tooling required. **Default.** |
 | `"monorepo"` | Build tooling (nx, turborepo, melos, etc.) manages the workspace. Skills may use this to pick a package-manager aware command (e.g. `melos run test` vs `flutter test`). |
+| `"polyrepo"` | Each platform is its own git repo, nested in and `.gitignore`d by a general/parent repo that owns the shared `docs/` and the tracker. On-disk identical to `sub-folder`; the difference is git topology (separate repos + remotes). `github.epics_repo` = the general repo; each `platforms[]` entry carries its own `repo`. **Experimental** (downstream skills not yet polyrepo-aware — see EPIC L #124). |
 
 **Not used for routing.** `structure` is advisory metadata. The `platforms[]` array drives all actual path resolution.
 
@@ -75,6 +83,7 @@ Each entry is an object with two keys:
 |---|---|---|---|
 | `name` | string | yes | Human-readable platform identifier. Used in skill output labels and log messages. |
 | `path` | string | yes | Relative path from repo root to the platform's code root. `"."` for single-platform. No trailing slash. |
+| `repo` | string | polyrepo only | GitHub repo name for this platform's code. Required when `structure == "polyrepo"`; absent otherwise. Used by `scripts/clone-all.sh` and area routing. |
 
 **Order** is significant: skills that iterate platforms process them in array order (top to bottom). List the primary/orchestrator platform first.
 
@@ -160,6 +169,39 @@ A skill invoked from within `backend/` reads `backend/.claude/tracker.json`, fin
 - Backend: `github` with full `github` config block.
 - Platform context: it is `backend-nest` at `backend/`.
 - Sibling platforms: `mobile-flutter` at `mobile/`.
+
+---
+
+### 3.3 Multi-platform polyrepo layout
+
+A `petripal` project with a NestJS backend and a Flutter app as **separate
+repos**, plus a `petripal-general` repo (the parent folder) holding shared docs
+and the tracker.
+
+**General repo `.claude/tracker.json`** *(in the parent folder)*
+```json
+{
+  "backend": "github",
+  "structure": "polyrepo",
+  "github": {
+    "org": "emberworks-lab",
+    "repo": "petripal-general",
+    "epics_repo": "petripal-general",
+    "project_number": 7
+  },
+  "platforms": [
+    { "name": "backend-nest", "path": "backend", "repo": "petripal-backend" },
+    { "name": "mobile-flutter", "path": "mobile", "repo": "petripal-mobile" }
+  ]
+}
+```
+
+`backend/` and `mobile/` are independent clones nested in the general repo's
+working tree and `.gitignore`d by it. Each carries the same minimal child
+`tracker.json` (`{ "backend": "github", "parent_path": "../" }`) as the
+sub-folder layout, so the reader algorithm resolves docs + root config
+identically. `scripts/clone-all.sh` rebuilds the working tree on a new machine
+from `github.org` + `platforms[].repo`.
 
 ---
 

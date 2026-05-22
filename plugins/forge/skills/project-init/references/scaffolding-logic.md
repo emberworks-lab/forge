@@ -58,7 +58,7 @@ Run `references/copy-templates.md` scoped to `<p.path>/` instead of repo root. T
 
 Stack-specific exceptions:
 
-- **`mobile-flutter`** — run the Flutter scaffolder pipeline (`references/flutter-scaffolder.md`) with its workspace target set to `<repo_root>/<p.path>/` instead of `~/Development/emberworks_lab_projects/<project>/`. The scaffolder's own `git init` / GitHub repo creation steps are **skipped** when running inside an existing multi-platform repo (the root already owns `.git`).
+- **`mobile-flutter`** — run the Flutter scaffolder pipeline (`references/flutter-scaffolder.md`) with its workspace target set to `<repo_root>/<p.path>/` instead of `~/Development/emberworks_lab_projects/<project>/`. The scaffolder's own `git init` / GitHub repo creation steps are **always skipped** in multi-platform mode. For `sub-folder` / `monorepo` the root owns the single `.git`. For `polyrepo` the per-repo git setup is done uniformly for **all** platforms (Flutter included) at step 7.9 (`references/polyrepo-setup.md`) — never inline here.
 - **`mobile-native`** / other placeholder stacks — if `plugins/forge/skill-templates/<p.name>/` has only a `README.md` and no `kit-*.md` files, copy the README into `<p.path>/.claude/skills/README.md` and stop. The scaffold-new-stack interview is **not** triggered automatically per platform during multi-platform init (would explode interview length); leave kit-* discovery for the user's first real ticket.
 
 ### S2.3 Write `<p.path>/CLAUDE.md`

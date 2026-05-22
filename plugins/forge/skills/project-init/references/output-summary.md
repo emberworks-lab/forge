@@ -28,3 +28,13 @@ Next:
 - **Linear skipped:** drop the Linear bullet from `Created:` and the corresponding `Next` step.
 - **Docs scaffold skipped:** drop the `docs/00_meta/` bullet.
 - **`--tracker-only` run:** do NOT print this block; tracker setup ends with its own confirmation line (`references/tracker-setup.md` T3).
+- **Polyrepo (`structure == "polyrepo"`):** add a `Repos created:` section listing the general repo + each platform repo (`<org>/<name>`), and a clone hint:
+  ```
+  Repos created:
+  - <org>/<general-repo>   (general — docs + tracker)
+  - <org>/<platform-repo>  (<platform name>)
+  ...
+
+  New machine:
+    gh repo clone <org>/<general-repo> && cd <general-repo> && ./scripts/clone-all.sh
+  ```
