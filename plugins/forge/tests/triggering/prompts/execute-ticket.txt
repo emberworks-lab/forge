@@ -1,0 +1,1 @@
+Implement tracker issue #42 for me — read the ticket body, figure out what needs to change, write the code, run the linter and tests, and post the manual test cases as a comment on the ticket.

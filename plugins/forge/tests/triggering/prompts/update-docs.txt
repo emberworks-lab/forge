@@ -1,0 +1,1 @@
+We just finished the authentication epic. Check whether the API reference, design docs, and project overview need to be synced with what was actually built, and update anything that's drifted.

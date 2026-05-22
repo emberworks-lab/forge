@@ -1,0 +1,1 @@
+The login flow just got refactored. Set up and run the full end-to-end test suite against it so I can see whether anything broke across the real browser and API boundaries.

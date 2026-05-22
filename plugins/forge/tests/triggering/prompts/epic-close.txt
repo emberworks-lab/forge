@@ -1,0 +1,1 @@
+All the stories in my current tracker epic are done, tests are passing, and I want to wrap everything up — run the code quality pass, review the branch, and then present me with the merge or PR options.
