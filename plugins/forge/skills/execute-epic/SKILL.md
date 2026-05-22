@@ -42,7 +42,7 @@ Resolve `feature/<prefix>-<epic_number>-<slug>` (slug = lowercased+hyphenated ep
 
 ### 3.5. E2E setup gate
 
-Once, in the main session (NOT a subagent), invoke `forge:e2e`'s setup-check. `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. This gate runs **once per epic**. Per-sub-issue `forge:execute-ticket` subagents MUST NOT re-run it.
+Once, in the main session (NOT a subagent), invoke `forge:e2e --check` — the parent walks the project's platforms and routes each to its child. `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. This gate runs **once per epic**. Per-sub-issue `forge:execute-ticket` subagents MUST NOT re-run it.
 
 ### 3.6. Graph refresh (preflight)
 
@@ -69,7 +69,7 @@ Read agent outputs in this turn (Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VE
 
 ### 6.5. Verification gate before completion claim (REQUIRED)
 
-Invoke `forge:verification-before-completion` (or apply its Iron Law inline): confirm fresh evidence of clean lint + pass tests before proceeding.
+Invoke `forge:verification-before-completion`: confirm fresh evidence of clean lint + pass tests, gathered in this turn, before proceeding.
 
 ### 7. Aggregate manual test cases on epic
 

@@ -50,7 +50,7 @@ Mode markers: A → `## References` with `docs/0X_*.md`; B-a → `## Steps` numb
 
 ### 3.5. E2E setup gate
 
-Standalone only: invoke `forge:e2e`'s setup-check. `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. From `forge:execute-epic` → skip entirely (the epic orchestrator ran this once at its start).
+Standalone only: invoke `forge:e2e --check` — the parent routes per platform to the right child (web / backend). `configured` / `not-applicable` → continue silently. `needs-setup` → show the prompt and act. From `forge:execute-epic` → skip entirely (the epic orchestrator ran this once at its start).
 
 ### 4. Mode-specific preparation
 
@@ -66,7 +66,7 @@ Detect ticket type and delegate. For FORGE-N config-only tickets → ad-hoc suba
 
 ### 6.5. E2E TDD loop (if ack opts in)
 
-Detect: ticket body has `## E2E coverage` with `required: yes | web | backend | mobile`. Absent / `required: no` → skip. Resolve flavor against `<project>/.claude/tracker.json` `platforms[]` (default `backend` when absent). RED phase: spawn `forge:tdd` with model **`opus`** to author e2e spec files from the ack block (web → `tests/e2e/<slug>.e2e-web.spec.ts`). Implementation (Step 6 delegate) makes them GREEN. After Step 6 returns, GREEN loop dispatches per flavor: **web** → `forge:e2e-web --run` (which dispatches `test-runner` sonnet with `type=e2e-web`); **backend** → raw `test-runner` agent **`sonnet`**. Both: `mode=report` then `mode=fix` (max 3). Still failing → halt; do NOT proceed to Step 7. Full contract + interaction with Step 8.5: see `references/e2e-tdd-loop.md`.
+Detect: ticket body has `## E2E coverage` with `required: yes | web | backend | mobile`. Absent / `required: no` → skip. Resolve flavor against `<project>/.claude/tracker.json` `platforms[]` (default `backend` when absent). RED phase: spawn `forge:tdd` with model **`opus`** to author e2e spec files from the ack block (web → `tests/e2e/<slug>.e2e-web.spec.ts`). Implementation (Step 6 delegate) makes them GREEN. After Step 6 returns, GREEN loop: invoke `forge:e2e --run --flavor <resolved>` `path_filter=<new specs>` — the parent dispatches to the web/backend child (each runs via `test-runner` **`sonnet`**). `mode=report` then `mode=fix` (max 3). Still failing → halt; do NOT proceed to Step 7. Full contract + interaction with Step 8.5: see `references/e2e-tdd-loop.md`.
 
 ### 7. Run linter
 
@@ -80,9 +80,9 @@ Read `CLAUDE.md > ## Essential commands`. Look for `Typecheck` row (preferred) o
 
 Spawn `test-runner` agent with **`sonnet`** model, `mode=report` first, `path_filter` = relevant test dir. Pass → continue. Fail → spawn again with `mode=fix`, `max_fix_iterations=3`; then one more `mode=report`. Still failing → halt + report; do NOT commit.
 
-### 8.5. Run e2e (if opted in)
+### 8.5. Run e2e regression (if opted in)
 
-If `<project>/.claude/e2e.json` exists with `db_isolation` other than `"none"`: invoke `forge:e2e <ticket-ref>`. On success → continue. On halt → halt `forge:execute-ticket`; do NOT commit; do NOT mark done.
+Complementary to Step 6.5: that step green-loops the NEW ack-derived specs (scoped); this step runs the FULL e2e suite under DB isolation as a final regression. If `<project>/.claude/e2e.json` opts in (`db_isolation` other than `"none"`): invoke `forge:e2e --run` (full suite). On success → continue. On halt → halt `forge:execute-ticket`; do NOT commit; do NOT mark done.
 
 ### 9. Generate manual test cases
 
@@ -90,11 +90,11 @@ Compose a `## Manual test cases` tracker comment: 3-5 bullets, action-oriented, 
 
 ### 10. Verification gate (REQUIRED)
 
-Invoke `forge:verification-before-completion`. Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. Re-run lint, confirm 0 errors in this turn; re-run tests, confirm pass; read actual output, not assumed state. THEN proceed to commit and DONE. For FORGE config-only tickets: the gate becomes "open the file you just edited, confirm the change is present in this turn".
+Invoke `forge:verification-before-completion` against the about-to-claim DONE state — it owns the Iron Law gate (fresh lint + test evidence gathered in this turn). Proceed to commit and DONE only on confirmed-clean. For FORGE config-only tickets the gate narrows to: open the file you just edited and confirm the change is present in this turn.
 
 ### 11. Commit (if `--commit`)
 
-Default NO COMMIT when standalone. When invoked from `forge:execute-epic` (`--commit` implied): stage + commit. **commit_close_phrase via backend recipe** with `kind=implements`. Message: `<phrase>: <ticket title lowercase>` then `Co-Authored-By: <model footer per plugins/forge/docs/conventions/git-workflow.md>`. Push the branch (first push of a new branch needs `--set-upstream`): `git push -u origin "$(git rev-parse --abbrev-ref HEAD)" 2>&1 | tail -1`. If push fails, warn and continue.
+Default NO COMMIT when standalone. When invoked from `forge:execute-epic` (`--commit` implied): invoke `forge:commit` with this ticket's ref + `kind=implements` — it reads the backend from `tracker.json`, composes the magic-word phrase + subject + co-author footer, and stages safely (never secrets). `forge:commit` does NOT push; after it returns, push the branch (first push of a new branch needs `--set-upstream`): `git push -u origin "$(git rev-parse --abbrev-ref HEAD)" 2>&1 | tail -1`. If push fails, warn and continue.
 
 ### 11.5. Mark ticket Done
 

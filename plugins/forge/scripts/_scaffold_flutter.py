@@ -3115,7 +3115,7 @@ Global rules → `plugins/forge/docs/` (testing, linting, linear-tickets, git-wo
 ## Skills
 
 Project-local (in `.claude/skills/`): {kit_md_inline}. See `.claude/SKILLS.md` for the full filtered list.
-Global: `/execute-epic`, `/execute-ticket`, `/commit`, `/epic-close`, `/pr-create`, `/kit-update-docs`, `/simplify-branch`. See `plugins/forge/skills/`.
+Global: `/execute-epic`, `/execute-ticket`, `/commit`, `/epic-close`, `/pr-create`, `/update-docs`, `/simplify-branch`. See `plugins/forge/skills/`.
 
 ## Environment
 

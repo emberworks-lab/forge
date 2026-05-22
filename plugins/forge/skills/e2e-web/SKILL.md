@@ -1,14 +1,14 @@
 ---
 name: e2e-web
-description: Run Playwright end-to-end tests for web projects, gate epic-close on a green suite, and scaffold the opt-in module on project init. Use for any `*.e2e-web.spec.ts` work.
+description: Web end-to-end testing child of forge:e2e — runs Playwright specs, gates epic-close on a green suite, and scaffolds the opt-in module on project init. Dispatched by forge:e2e for the web flavor. Use for any `*.e2e-web.spec.ts` work.
 type: hybrid
 ---
 
 # forge:e2e-web
 
-Web-side end-to-end testing for forge projects. Runs Playwright specs (`**/*.e2e-web.spec.ts`) against the project, gates `forge:epic-close`, and is the auto-installer when `forge:project-init` selects the web-nextjs Playwright module.
+The web platform child of `forge:e2e`. Runs Playwright specs (`**/*.e2e-web.spec.ts`) against the project, and is dispatched by the parent for the web flavor. The parent `forge:e2e` owns the universal lifecycle + opt-in model; this skill owns the Playwright specifics.
 
-A future `forge:e2e` (backend) will mirror this shape so the two stay symmetric.
+Sibling child `forge:e2e-backend` covers DB-isolated backend e2e. Playwright is an **external** dependency — this skill references its usage and surfaces the manual-setup template; it never vendors Playwright into the plugin.
 
 ## Convention
 
@@ -34,7 +34,7 @@ A future `forge:e2e` (backend) will mirror this shape so the two stay symmetric.
 }
 ```
 
-Three-state model — same pattern as `forge:e2e` backend / `.claude/e2e.json`:
+Three-state model — the universal one defined by `forge:e2e` (sibling `forge:e2e-backend` uses `.claude/e2e.json`):
 
 | Marker | `opted_in` | Behaviour |
 |---|---|---|
@@ -72,20 +72,23 @@ Failure surfacing is the caller's job: the TDD loop reads it on every turn; the 
 
 ### `--init` (init)
 
-Invoked manually (`/forge:e2e-web --init`) or by `forge:project-init` when the user opts into the web-nextjs Playwright module (#82).
+Invoked manually (`/forge:e2e-web --init`) or by `forge:e2e --init` / `forge:project-init` when a web platform is present.
 
 Procedure:
 
-1. Write `<project>/.claude/e2e-web.json` with `opted_in: true` and the default `config` block above (browsers default to `["chromium"]`; can be widened later).
-2. Scaffold `<project>/tests/e2e/` with a `.gitkeep` so the directory survives commits.
-3. Write `<project>/playwright.config.ts` from the project-init opt-in module (#82 owns the template content — this skill only triggers the copy when invoked standalone; project-init handles its own copy directly).
-4. If Playwright is not yet installed, surface the manual-setup template (do not run npm commands silently).
-5. Emit a one-line summary: `e2e-web initialised; run /forge:e2e-web --check to verify.`
+1. **Ask the opt-in question first:** "This is a web platform. Do you want Playwright e2e tests here? (yes / no)". Playwright is an external dependency — installing it is the user's choice.
+   - **No** → write `<project>/.claude/e2e-web.json` with `opted_in: false` and stop. The opt-out is recorded so e2e is never proposed for this platform again.
+   - **Yes** → continue.
+2. Write `<project>/.claude/e2e-web.json` with `opted_in: true` and the default `config` block above (browsers default to `["chromium"]`; can be widened later).
+3. Scaffold `<project>/tests/e2e/` with a `.gitkeep` so the directory survives commits.
+4. Write `<project>/playwright.config.ts` from the project-init opt-in module (#82 owns the template content — this skill only triggers the copy when invoked standalone; project-init handles its own copy directly).
+5. If Playwright is not yet installed, surface the manual-setup template (do not run npm commands silently).
+6. Emit a one-line summary: `e2e-web initialised; run /forge:e2e --check to verify.`
 
 ## Trigger
 
-- **Auto:** `forge:execute-epic` Step 3.5 (`--check`), `forge:execute-ticket` web TDD loop #84 (`--run`), `forge:epic-close` web gate #85 (`--check` then `--run`), `forge:project-init` web opt-in module #82 (`--init`).
-- **Manual:** `/forge:e2e-web --check | --run [path] | --init`.
+- **Auto:** dispatched by the `forge:e2e` parent for the `web` flavor (`--check` / `--run` / `--init`). Setup-time `--init` from `forge:project-init` is intended but not yet wired (tracked in #105).
+- **Manual:** `/forge:e2e-web --check | --run [path] | --init` for direct web-only use.
 
 ## Do not
 
@@ -98,6 +101,7 @@ Procedure:
 ## What this skill does not cover
 
 - **Authoring the specs themselves** — see `forge:tdd` for the discipline; the web TDD loop (#84) drives spec writing.
-- **DB isolation for e2e** — out of scope here; backend `forge:e2e` owns that contract (`plugins/forge/docs/e2e-isolation/`).
+- **DB isolation for e2e** — out of scope here; sibling `forge:e2e-backend` owns that contract (`plugins/forge/docs/e2e-isolation/`).
+- **Universal rules + routing** — owned by the parent `forge:e2e`.
 - **Mobile e2e** — separate research track (#86–#89).
 - **CI integration** — orthogonal; each project wires Playwright into its own CI.

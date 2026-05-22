@@ -81,7 +81,7 @@ These rules apply unless overridden by project docs. Skills consult them in this
 
 ## Skills (global, used here)
 
-`/create-epic`, `/create-ticket`, `/execute-epic`, `/execute-ticket`, `/commit`, `/epic-close`, `/pr-create`, `/kit-update-docs`, `/simplify-branch`, `/project-init`. See `~/.claude/commands/`.
+`/create-epic`, `/create-ticket`, `/execute-epic`, `/execute-ticket`, `/commit`, `/epic-close`, `/pr-create`, `/update-docs`, `/simplify-branch`, `/project-init`. See `~/.claude/commands/`.
 
 ## Environment
 

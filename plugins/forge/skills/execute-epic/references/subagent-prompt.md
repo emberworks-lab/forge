@@ -34,9 +34,7 @@ You MUST:
 - Run tests via test-runner agent (mode=report; mode=fix if failures, max 3 iters)
 - Halt cleanly if lint or tests still fail after fix attempts. Do NOT commit a broken state.
 - Generate manual test cases as a tracker comment on this ticket
-- Use commit_close_phrase via backend recipe for the commit prefix
-- Use Co-Authored-By: Claude <Model> ... footer matching your assigned model
-- Push the branch after the commit (first push: `git push -u origin "$(git rev-parse --abbrev-ref HEAD)"`). If push fails (network, auth, branch-protection), print the error and continue — do NOT halt the ticket. Per-ticket push gives visibility + resilience; auto-close still requires PR merge to default branch.
+- Commit + push are handled by `forge:execute-ticket` Step 11 because you passed `--commit`: it invokes `forge:commit` (backend magic-word phrase + co-author footer + safe staging), then pushes the branch. If push fails (network, auth, branch-protection), it warns and continues — do NOT halt the ticket. Per-ticket push gives visibility + resilience; auto-close still requires PR merge to default branch.
 
 You MUST NOT:
 - Modify other tickets

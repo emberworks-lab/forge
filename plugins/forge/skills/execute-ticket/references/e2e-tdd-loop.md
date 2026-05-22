@@ -13,8 +13,8 @@ scope: <prose>
 ```
 
 - `required: yes` → use the project's **default** e2e flavor (see qualifier resolution below). Alias for `backend` when `platforms[]` is missing.
-- `required: web` → web e2e flavor (Playwright). Specs go to `tests/e2e/<feature-slug>.e2e-web.spec.ts`; GREEN loop runs via `forge:e2e-web --run`.
-- `required: backend` → backend HTTP / API e2e flavor. Explicit alias for `yes` on backend-only projects. GREEN loop runs via raw `test-runner` agent (no per-flavor wrapper yet).
+- `required: web` → web e2e flavor (Playwright). Specs go to `tests/e2e/<feature-slug>.e2e-web.spec.ts`; GREEN loop runs via `forge:e2e --run --flavor web` (parent dispatches to `forge:e2e-web`).
+- `required: backend` → backend HTTP / API e2e flavor. Explicit alias for `yes` on backend-only projects. GREEN loop runs via `forge:e2e --run --flavor backend` (parent dispatches to `forge:e2e-backend`, DB-isolated).
 - `required: mobile` → mobile e2e flavor (research; may halt as "no consumer wired yet").
 
 ## Qualifier resolution
@@ -51,22 +51,14 @@ If `forge:tdd` returns `BLOCKED` or `NEEDS_CONTEXT` → relay to the user with t
 
 Continue with Step 6 as documented (delegate to `forge:subagent-driven-development`). The subagents now have a clear definition of done: the new RED specs must turn GREEN. The orchestrator notes that the RED specs from 6.5.1 ARE the contract for this implementation phase, and forwards them as plan context.
 
-### 6.5.3 — GREEN: loop e2e tests (per-flavor consumer)
+### 6.5.3 — GREEN: loop e2e tests (via the forge:e2e parent)
 
-After the implementation phase returns DONE, dispatch the GREEN loop based on resolved flavor.
-
-**Web flavor** (`required: web`): invoke `forge:e2e-web --run` with `cwd` = project root, `path_filter` = the spec dir / file(s) written in 6.5.1, `mode=report` first. The skill dispatches `test-runner` (model: **`sonnet`**) with `type=e2e-web` internally.
+After the implementation phase returns DONE, invoke `forge:e2e --run --flavor <resolved>` with `cwd` = project root, `path_filter` = the spec dir / file(s) written in 6.5.1, `mode=report` first. The parent dispatches to the resolved child (`forge:e2e-web` for `web`, `forge:e2e-backend` for `backend`); each runs the specs via the `test-runner` agent (model: **`sonnet`**) — web with `type=e2e-web`, backend inside a provisioned throwaway DB with teardown.
 
 - Pass → continue to Step 7 (lint).
-- Fail → invoke `forge:e2e-web --run` again with `mode=fix` (skill caps `max_fix_iterations=3`). Then one more `mode=report` to confirm GREEN.
-- Still failing → halt with `e2e-tdd-loop-failed: web specs did not reach GREEN after fix iterations`; do NOT continue to Step 7; do NOT commit.
-
-**Backend flavor** (`required: backend` or `yes`-resolved-to-backend): spawn `test-runner` agent directly with model **`sonnet`** (no per-flavor wrapper yet).
-
-- `mode=report` first, `path_filter` = the e2e spec dir for backend.
-- Pass → continue to Step 7 (lint).
-- Fail → spawn `test-runner` again with `mode=fix`, `max_fix_iterations=3`. Then one more `mode=report` to confirm GREEN.
-- Still failing → halt with `e2e-tdd-loop-failed: backend specs did not reach GREEN after fix iterations`; do NOT continue to Step 7; do NOT commit.
+- Fail → invoke `forge:e2e --run --flavor <resolved>` again with `mode=fix` (the child caps `max_fix_iterations=3`). Then one more `mode=report` to confirm GREEN.
+- Still failing → halt with `e2e-tdd-loop-failed: <flavor> specs did not reach GREEN after fix iterations`; do NOT continue to Step 7; do NOT commit.
+- `mobile` flavor → the parent returns `not-applicable` (no mobile child wired yet); relay and halt as `mobile-e2e-not-wired`.
 
 ## Interaction with Step 8.5 (existing e2e runner)
 

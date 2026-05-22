@@ -24,15 +24,15 @@ At every tracker-touching step: read `<project>/.claude/tracker.json` → `backe
 
 #### 0b. Tests-pass hard gate (REQUIRED)
 
-Iron Law: NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE. Re-run, don't trust prior runs.
+Apply `forge:verification-before-completion` — fresh evidence, re-run in this turn; don't trust prior runs.
 
 - Spawn `linter-runner` agent (`mode=report`, no path filter) — model **`sonnet`**.
 - Spawn `test-runner` agent (`mode=report`, full suite) — model **`sonnet`**.
-- **Web e2e per platform.** Read `<project>/.claude/tracker.json` → `platforms[]` per `plugins/forge/docs/conventions/tracker-json.md` §4 reader algorithm. For each platform whose name matches `web*` (or whose `path/package.json` lists `next` / `react` / `vite` / `astro`) AND has `<platform.path>/.claude/e2e-web.json` present with `opted_in: true`: invoke `forge:e2e-web --run` with `cwd=<platform.path>`, `mode=report` (full suite, no `path_filter`). The skill dispatches the `test-runner` agent — model **`sonnet`** — with `type=e2e-web`. Platforms without the opt-in marker, or with `opted_in: false`, are skipped silently. If `platforms[]` is absent, treat the repo root as the single default platform and apply the same marker check.
+- **E2E per platform.** Invoke `forge:e2e --run` (no `--flavor`): the parent walks `tracker.json` `platforms[]` (reader algorithm: `plugins/forge/docs/conventions/tracker-json.md` §4), dispatches each opted-in platform to its child (`forge:e2e-web` / `forge:e2e-backend`), and runs each full suite in `mode=report`. Children dispatch the `test-runner` agent — model **`sonnet`**. Platforms not opted in are skipped silently; if `platforms[]` is absent, the repo root is the single default platform.
 
-Read all agent outputs in this turn. If linter, unit tests, or any web e2e run fails:
+Read all agent outputs in this turn. If linter, unit tests, or any e2e run fails:
 
-> "EMB-X tests-pass gate FAILED. Lint: <count> / Tests: <count> / E2E-web: <platform:count>. Snippet: <first failure>. No close actions until clean. Fix and re-run, OR `/execute-epic --start-from <ticket>`."
+> "EMB-X tests-pass gate FAILED. Lint: <count> / Tests: <count> / E2E: <platform:count>. Snippet: <first failure>. No close actions until clean. Fix and re-run, OR `/execute-epic --start-from <ticket>`."
 
 Halt. If all pass → continue.
 
@@ -158,7 +158,7 @@ If closing a phase / milestone, use the backend's native status update (e.g., Li
 
 #### 8d. Sync docs
 
-Invoke `forge:kit-update-docs` (same-session, inline). Move the epic line in `docs/FEATURES.md` `## In progress` → `## Delivered` (A/B) or `## Deferred` (C), if `FEATURES.md` exists. If `docs/owner-overview.md` exists, `forge:kit-update-docs` MUST also refresh Features.Shipped, Features.In-progress, and Phases — see policy in `plugins/forge/CLAUDE.md § Owner overview update on epic close`.
+Invoke `forge:update-docs --epic <EPIC-ID>` (same-session, inline). The router analyses scope and dispatches only the in-scope children (meta / api / design) — a docs-only or unrelated epic may touch nothing. The meta child refreshes `docs/owner-overview.md` Features.Shipped/In-progress/Phases when present — see policy in `plugins/forge/CLAUDE.md § Owner overview update on epic close`. Also move the epic line in `docs/FEATURES.md` `## In progress` → `## Delivered` (A/B) or `## Deferred` (C), if `FEATURES.md` exists.
 
 ### Step 9 — Output
 

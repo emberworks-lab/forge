@@ -2,7 +2,7 @@
   Owner overview — high-level project snapshot for the human owner.
 
   Auto-update contract: scaffolded by `/forge:project-init`; refreshed by
-  `/forge:kit-update-docs` on epic close, dependency changes, milestone
+  `/forge:update-docs` on epic close, dependency changes, milestone
   changes. Sections OUTSIDE `<!-- manual -->` guards may be regenerated.
   Content INSIDE `<!-- manual --> ... <!-- /manual -->` is preserved
   verbatim across regeneration.
@@ -29,7 +29,7 @@ _e.g. "An offline-first mobile RPG that turns daily habits into quest progressio
 
 ## 2. Features
 
-Three buckets. **Shipped** and **In progress** are auto-maintained by `/forge:kit-update-docs` from epic + ticket state. **Planned** is hand-curated.
+Three buckets. **Shipped** and **In progress** are auto-maintained by `/forge:update-docs` from epic + ticket state. **Planned** is hand-curated.
 
 ### Shipped
 
@@ -138,14 +138,14 @@ Quick-reference for read-only humans (PMs, designers, new contributors). Full ru
 | Ticket prefix | `{{ ticket_prefix }}` _(e.g. EMB, FORGE)_ |
 | PR target | `main` (default) — never push directly without explicit instruction |
 | Decisions | `/forge:log-decision` appends to `docs/00_meta/decisions-log.md` |
-| Docs refresh | `/forge:kit-update-docs` after branch finish or stack-touching change |
+| Docs refresh | `/forge:update-docs` after branch finish or stack-touching change |
 
 ---
 
 ## How this file stays fresh
 
 - **Scaffolded by:** `/forge:project-init` (one-time, from this template).
-- **Auto-updated by:** `/forge:kit-update-docs` on epic close, dependency changes, milestone changes.
+- **Auto-updated by:** `/forge:update-docs` on epic close, dependency changes, milestone changes.
 - **Hand-edited zones:** anything inside `<!-- manual --> ... <!-- /manual -->` is preserved verbatim across regeneration. Auto-zones use `<!-- auto:<key> --> ... <!-- /auto:<key> -->`.
 - **Cap:** ≤ 300 lines. Auto-regen aborts and asks the user to prune if exceeded.
 - **Spec:** `plugins/forge/docs/conventions/owner-overview.md`.

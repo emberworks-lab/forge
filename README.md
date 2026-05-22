@@ -65,7 +65,7 @@ Interview-driven scaffold. Picks tracker backend (Linear / GitHub personal / Git
 
 ## Skill catalog
 
-Full descriptions in each `plugins/forge/skills/<name>/SKILL.md`. The plugin ships **31 skills** organized below.
+Full descriptions in each `plugins/forge/skills/<name>/SKILL.md`. The plugin ships **43 skills** organized below. Two families use a parent-router + per-flavor children shape: **e2e** (`forge:e2e` → web / backend / mobile) and **docs-sync** (`forge:update-docs` → meta / api / design).
 
 ### Tracker pipeline
 
@@ -76,8 +76,9 @@ Full descriptions in each `plugins/forge/skills/<name>/SKILL.md`. The plugin shi
 | [`execute-epic`](plugins/forge/skills/execute-epic/) | Orchestrate epic execution. Manual-setup gate, branch, dependency-ordered subagent dispatch, per-ticket commits |
 | [`execute-ticket`](plugins/forge/skills/execute-ticket/) | Execute a single ticket. Invokes `forge:tdd` for e2e RED→GREEN loop when ack criteria carry the E2E block (backend or web) |
 | [`epic-close`](plugins/forge/skills/epic-close/) | Close a tracker epic. Steps 0-7: preflight → simplify → review → classifier → 3 actions (defer / inline+defer / inline+spawn-execute) → decision tree (merge / draft PR / cleanup) |
-| [`commit`](plugins/forge/skills/commit/) | Magic-word commit linked to tracker; dispatches per `tracker.json.backend` |
+| [`commit`](plugins/forge/skills/commit/) | Magic-word commit linked to tracker; dispatches per `tracker.json.backend`. Invoked by execute-ticket/epic at commit time |
 | [`pr-create`](plugins/forge/skills/pr-create/) | Open a draft PR linked to the epic with sub-issue summary |
+| [`manual-cases-list`](plugins/forge/skills/manual-cases-list/) | On-demand aggregation of sub-issue `## Manual test cases` into one epic checklist (standalone counterpart to execute-epic Step 7) |
 
 ### Planning + ideation
 
@@ -88,12 +89,15 @@ Full descriptions in each `plugins/forge/skills/<name>/SKILL.md`. The plugin shi
 | [`grill-with-docs`](plugins/forge/skills/grill-with-docs/) | Grilling that challenges plan against the project domain model + updates CONTEXT.md / ADRs inline |
 | [`prototype`](plugins/forge/skills/prototype/) | Throwaway prototype to answer a design question — terminal logic app or UI variations |
 | [`zoom-out`](plugins/forge/skills/zoom-out/) | Step back from the immediate task and re-derive priorities |
+| [`to-prd`](plugins/forge/skills/to-prd/) | Synthesize the conversation + codebase into a PRD (no interview); backend-aware publish, output feeds create-ticket Mode A |
 
 ### Implementation
 
 | Skill | Use |
 |---|---|
 | [`tdd`](plugins/forge/skills/tdd/) | Rigid red-green-refactor. Invoked by `execute-ticket` and `diagnose-deep` when production code is about to be written |
+| [`subagent-driven-development`](plugins/forge/skills/subagent-driven-development/) | Execute a plan one fresh subagent per task, with two-stage review (spec then quality). Invoked by execute-ticket for the implementation phase |
+| [`verification-before-completion`](plugins/forge/skills/verification-before-completion/) | The Iron Law gate — no completion claim without fresh verification evidence. Invoked before any DONE / commit / merge |
 | [`project-init`](plugins/forge/skills/project-init/) | Interview-driven project bootstrap (see Quick start) |
 
 ### Diagnosis + debugging
@@ -111,6 +115,7 @@ Full descriptions in each `plugins/forge/skills/<name>/SKILL.md`. The plugin shi
 | [`simplify`](plugins/forge/skills/simplify/) | Review the most recent code change for reuse / quality / efficiency, then fix |
 | [`simplify-branch`](plugins/forge/skills/simplify-branch/) | Same as above but across all commits in current branch vs base |
 | [`handle-review-feedback`](plugins/forge/skills/handle-review-feedback/) | Process PR / Linear feedback by classifying each item before implementing |
+| [`improve-codebase-architecture`](plugins/forge/skills/improve-codebase-architecture/) | Surface architectural deepening opportunities (deep vs shallow modules) informed by CONTEXT.md + ADRs. Higher-level than simplify |
 | [`graph-refresh`](plugins/forge/skills/graph-refresh/) | Thin wrapper around `code-review-graph build --incremental`. Idempotent; safe to call any time |
 
 ### Design
@@ -120,11 +125,24 @@ Full descriptions in each `plugins/forge/skills/<name>/SKILL.md`. The plugin shi
 | [`design-bootstrap`](plugins/forge/skills/design-bootstrap/) | Invoked by `project-init` on frontend platforms. 3-branch: ready / stack-defaults / will-create |
 | [`design-source`](plugins/forge/skills/design-source/) | Invoked by `create-epic` for frontend epics without a design source. 3-branch: co-create / external-generator-prompt / 3 HTML variations |
 
-### Manual testing
+### End-to-end testing
 
 | Skill | Use |
 |---|---|
-| [`e2e-web`](plugins/forge/skills/e2e-web/) | Playwright e2e for web projects. Sub-modes: `--check` / `--run` / `--init`. Convention: `**/*.e2e-web.spec.ts` + `<project>/.claude/e2e-web.json` opt-in |
+| [`e2e`](plugins/forge/skills/e2e/) | Parent router — universal e2e contract (opt-in model, RED→GREEN lifecycle, validation discipline) + resolves flavor from `platforms[]` and dispatches to the child |
+| [`e2e-web`](plugins/forge/skills/e2e-web/) | Playwright child. Convention `**/*.e2e-web.spec.ts` + `.claude/e2e-web.json` opt-in; Playwright is external (not vendored) |
+| [`e2e-backend`](plugins/forge/skills/e2e-backend/) | DB-isolated child. provision → migrate → run → teardown via `docs/e2e-isolation/` recipes; `.claude/e2e.json` opt-in |
+| `e2e-mobile` *(planned)* | Future child router → Patrol / Detox / native + device target. Documented in `forge:e2e`; built when mobile e2e leaves research |
+
+### Documentation sync
+
+| Skill | Use |
+|---|---|
+| [`update-docs`](plugins/forge/skills/update-docs/) | Parent router — analyses the epic's scope (is a pass even needed?) and dispatches only the in-scope children. MD source / generated-HTML format law |
+| [`update-docs-meta`](plugins/forge/skills/update-docs-meta/) | Project-wide root docs: owner-overview, roadmap, decisions-log, glossary |
+| [`update-docs-api`](plugins/forge/skills/update-docs-api/) | Backend API reference — Swagger/OpenAPI pipeline (opt-in) or hand-written MD fallback |
+| [`update-docs-design`](plugins/forge/skills/update-docs-design/) | Design-doc + ADR drift detection — flags probable staleness, never rewrites prose |
+| [`log-decision`](plugins/forge/skills/log-decision/) | Guided flow to append a locked decision to `docs/00_meta/decisions-log.md`. The decision-locks counterpart to update-docs |
 
 ### Stack-specific helpers
 
@@ -290,10 +308,12 @@ The log is committed to the repo so PR reviewers can see *why*, not just *what*.
 
 ## Status
 
-**v1.0.0** — Production-ready. Core tracker pipeline, multi-platform init, code review, design ecosystem starter, web e2e, mobile e2e research artifacts all functional.
+**v1.1.0** — Production-ready. Core tracker pipeline, multi-platform init, code review, design ecosystem, e2e (web + backend + mobile-research), docs-sync, and plugin authoring all functional. The v1.1.0 plugin-integrity pass (#105) built the previously-missing skills (`forge:e2e` family, `forge:update-docs` family, `verification-before-completion`, `subagent-driven-development`) and removed all phantom skill references.
 
 Known follow-ups (open tickets):
-- `forge:kit-update-docs` — referenced by `epic-close` for owner-overview refresh; skill itself not yet implemented (tracked in B#50 / C+D#60 / C+D#65)
+- `forge:e2e-mobile` — parent documents the branch; framework children (Patrol / Detox / native) built when mobile e2e leaves research (#86-89)
+- `forge:project-init` → `forge:e2e --init` setup wiring (#105)
+- Runtime verification of the new docs-sync + e2e skills on a real repo
 - F.1 caveman pilot — protocol scaffolded, awaiting human-driven measurement
 - G.1 articles digest — awaiting user-provided article list
 - C+D.10 + .15 multi-platform pilots — human sandbox + Embergard/PantryPal fill
