@@ -78,7 +78,7 @@ fi
 # Resolve paths
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 FORGE_PLUGIN_DIR="${REPO_ROOT}/plugins/forge"
 SKILL_TEMPLATES_DIR="${FORGE_PLUGIN_DIR}/skill-templates"
 
@@ -245,10 +245,16 @@ if [ "${#FAIL_MESSAGES[@]}" -gt 0 ]; then
   done
 fi
 
-# Clean up scratch dir only when this script created it (--live mode)
+# Clean up scratch dir only on success; preserve it on failure so the headless
+# claude log + partial scaffold can be inspected.
 if [ "$LIVE_RUN" = "true" ] && [ -n "${SCRATCH_DIR:-}" ] && [ -d "${SCRATCH_DIR:-}" ]; then
-  printf '\nCleaning up scratch dir: %s\n' "$SCRATCH_DIR"
-  rm -rf "$SCRATCH_DIR"
+  if [ "$FAIL" -eq 0 ]; then
+    printf '\nCleaning up scratch dir: %s\n' "$SCRATCH_DIR"
+    rm -rf "$SCRATCH_DIR"
+  else
+    printf '\nPreserving scratch dir for debugging: %s\n' "$SCRATCH_DIR"
+    printf 'Headless claude log: %s\n' "${LOG_FILE:-<unset>}"
+  fi
 fi
 
 if [ "$FAIL" -gt 0 ]; then
