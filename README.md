@@ -312,8 +312,7 @@ The log is committed to the repo so PR reviewers can see *why*, not just *what*.
 
 Known follow-ups (open tickets):
 - `forge:e2e-mobile` — parent documents the branch; framework children (Patrol / Detox / native) built when mobile e2e leaves research (#86-89)
-- `forge:project-init` → `forge:e2e --init` setup wiring (#105)
-- Runtime verification of the new docs-sync + e2e skills on a real repo
+- Runtime verification of the new docs-sync + e2e skills on a real repo (incl. the `project-init` → `forge:e2e --init` / `forge:design-bootstrap` wiring)
 - F.1 caveman pilot — protocol scaffolded, awaiting human-driven measurement
 - G.1 articles digest — awaiting user-provided article list
 - C+D.10 + .15 multi-platform pilots — human sandbox + Embergard/PantryPal fill

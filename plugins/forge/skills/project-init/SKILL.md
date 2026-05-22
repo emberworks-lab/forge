@@ -28,6 +28,8 @@ When the flow completes (full mode), the project has:
 7. `docs/owner-overview.md` — always; scaffolded in step 6.5 from `plugins/forge/skill-templates/_common/owner-overview.md` with project-init answers substituted. Always at repo root.
 8. Per-platform `<path>/CLAUDE.md` (multi-platform only) — per-stack body with the mandatory cross-ref block injected (see `references/scaffolding-logic.md` S2.3).
 9. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
+10. `.claude/e2e-*.json` — per-platform e2e opt-in / opt-out markers, written by `forge:e2e --init` (step 7.6).
+11. Design posture — recorded by `forge:design-bootstrap` (step 7.7) when a frontend platform is present: one of a `design` block in `tracker.json`, a `## Design` block in CLAUDE.md, or a `design/` stub plus a parking-lot epic.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -185,7 +187,19 @@ Run `references/tracker-setup.md` with the backend chosen in step 2.6. Writes `<
 
 ### 7.5. Linear automation
 
-If step 2.6 = `linear` **and** step 2.7 = **Yes**, follow `references/linear-automation.md`: resolve team → create project → detect credential needs → create P0 Bootstrap epic + Mode M sub-issues + P1 MVP placeholder → print summary. Otherwise (any non-Linear backend, or Linear with **No** / **Skip**), make zero Linear MCP calls; jump to step 8.
+If step 2.6 = `linear` **and** step 2.7 = **Yes**, follow `references/linear-automation.md`: resolve team → create project → detect credential needs → create P0 Bootstrap epic + Mode M sub-issues + P1 MVP placeholder → print summary. Otherwise (any non-Linear backend, or Linear with **No** / **Skip**), make zero Linear MCP calls; jump to step 7.6.
+
+### 7.6. E2E opt-in
+
+> Skip entirely if `--tracker-only` was passed.
+
+Invoke `forge:e2e --init`. It walks `platforms[]` from the now-written `tracker.json`, asks the user per platform whether they want e2e there, and writes the opt-in / opt-out marker (`.claude/e2e-*.json`) so the question is never re-asked. project-init does not ask the e2e question itself — `forge:e2e --init` owns the per-platform prompt and child dispatch (web → Playwright, backend → DB isolation; mobile is a future child and returns `not-applicable`).
+
+### 7.7. Design posture (frontend platforms only)
+
+> Skip entirely if `--tracker-only` was passed, or if no `platforms[]` entry is a frontend stack (web-frontend / mobile-flutter / mobile-native).
+
+Invoke `forge:design-bootstrap`, passing any Figma URL / tokens answer captured during the stack interview (step 2.1 question 6) so its branch (a) does not re-ask. The skill records exactly one outcome per its own contract: a `design` block in `tracker.json`, a `## Design` block in CLAUDE.md, or a `design/` stub plus a parking-lot epic via `forge:create-epic`. Placed here — after CLAUDE.md (step 5 / 4.5) and `tracker.json` (step 7.25) both exist — so every branch has the artifact it writes to.
 
 ### 8. Output
 
