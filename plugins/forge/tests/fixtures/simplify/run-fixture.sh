@@ -75,7 +75,7 @@ fi
 # Resolve paths
 # ---------------------------------------------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../../../.." && pwd)"
 FORGE_PLUGIN_DIR="${REPO_ROOT}/plugins/forge"
 SEED_FILE="${SCRIPT_DIR}/seed-duplicate.ts"
 
