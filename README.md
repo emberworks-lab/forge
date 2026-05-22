@@ -308,14 +308,18 @@ The log is committed to the repo so PR reviewers can see *why*, not just *what*.
 
 ## Status
 
-**v1.1.0** — Production-ready. Core tracker pipeline, multi-platform init, code review, design ecosystem, e2e (web + backend + mobile-research), docs-sync, and plugin authoring all functional. The v1.1.0 plugin-integrity pass (#105) built the previously-missing skills (`forge:e2e` family, `forge:update-docs` family, `verification-before-completion`, `subagent-driven-development`) and removed all phantom skill references.
+**v1.2.0** — Production-ready. Core tracker pipeline, multi-platform init, code review, design ecosystem, e2e (web + backend + mobile-research), docs-sync, plugin authoring, an automated test harness, and config-driven kit-skill templates all functional.
+
+- **v1.2.0** added the automated **test harness** (`plugins/forge/tests/` — structural / triggering / fixtures + CI workflow) and **config-driven kit-skill templates** for `backend-nest` (5 skills) and `web-nextjs` (2), plus `project-init` wiring for `forge:e2e --init`, `forge:design-bootstrap`, and the api-docs opt-in. Live validation: structural 43/43, triggering 6/6, fixtures (project-init / simplify / e2e-init) green.
+- **v1.1.0** plugin-integrity pass (#105) built the previously-missing skills (`forge:e2e` family, `forge:update-docs` family, `verification-before-completion`, `subagent-driven-development`) and removed all phantom skill references.
 
 Known follow-ups (open tickets):
 - `forge:e2e-mobile` — parent documents the branch; framework children (Patrol / Detox / native) built when mobile e2e leaves research (#86-89)
-- Runtime verification of the new docs-sync + e2e skills on a real repo (incl. the `project-init` → `forge:e2e --init` / `forge:design-bootstrap` wiring)
+- backend-nest `docs:api` end-to-end render verification on a real backend; `forge:update-docs` family runtime verification
+- Multi-platform variant of the project-init fixture (single-platform path covered + verified)
 - F.1 caveman pilot — protocol scaffolded, awaiting human-driven measurement
 - G.1 articles digest — awaiting user-provided article list
-- C+D.10 + .15 multi-platform pilots — human sandbox + Embergard/PantryPal fill
+- C+D.15 — Embergard / PantryPal owner-overview fill
 
 See [open issues](https://github.com/emberworks-lab/forge/issues) for the live backlog.
 

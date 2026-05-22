@@ -14,7 +14,7 @@
       "name": "forge",
       "source": "./plugins/forge",
       "strict": false,
-      "version": "1.1.1",
+      "version": "1.2.0",
       "description": "Production-ready AI-driven product engineering workflows for Claude Code. Tracker pipeline (Linear/GitHub/Markdown), multi-platform init, design ecosystem, e2e (web/backend/mobile), docs-sync, code review, plugin authoring. 43 skills, 2 agents, 7 skill-templates.",
       "author": {
         "name": "Anton Chontoroh",
