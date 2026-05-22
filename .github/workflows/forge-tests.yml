@@ -1,0 +1,100 @@
+name: forge-tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+    inputs:
+      run_billable:
+        description: "Run billable tiers (triggering + fixtures)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+  schedule:
+    # Nightly at 02:00 UTC — billable tiers only
+    - cron: "0 2 * * *"
+
+# ---------------------------------------------------------------------------
+# Fast gate — structural tier
+# Runs on every push and pull_request.
+# No model invocations; deterministic; fast (~30 s).
+# Blocks merge on failure.
+# ---------------------------------------------------------------------------
+jobs:
+  structural:
+    name: "Structural tests (fast gate)"
+    runs-on: ubuntu-latest
+    # Always run on push/PR events.
+    # On workflow_dispatch: run regardless of run_billable value.
+    # On schedule: skip (nightly only runs billable tiers).
+    if: github.event_name != 'schedule'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run structural tier
+        run: bash plugins/forge/tests/structural/run-all.sh
+
+# ---------------------------------------------------------------------------
+# Billable tiers — triggering + fixtures
+# Runs ONLY via workflow_dispatch (manual) or the nightly schedule.
+# NEVER runs on push or pull_request.
+#
+# Requires secret: ANTHROPIC_API_KEY
+#   Set it in the repo → Settings → Secrets and variables → Actions.
+#   The key must have access to a Claude model that supports `claude -p`.
+#   See plugins/forge/tests/README.md for the exact secret name and scope.
+# ---------------------------------------------------------------------------
+  billable:
+    name: "Billable tests (triggering + fixtures)"
+    runs-on: ubuntu-latest
+    # Run when:
+    #   - workflow_dispatch with run_billable == "true"
+    #   - nightly schedule
+    if: >
+      github.event_name == 'schedule' ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.event.inputs.run_billable == 'true')
+
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Claude CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Run triggering tier
+        run: bash plugins/forge/tests/triggering/run-all.sh
+
+      - name: Run fixture tier (assertion-only; use --live for full billable run)
+        # Each fixture's run-fixture.sh exits 2 (usage error) without --live or
+        # --result-dir.  We run with --result-dir pointing to the fixture dir
+        # itself so the assertion-only mode can find any pre-baked result files.
+        # For a true end-to-end live run, trigger manually with --live — that
+        # requires real claude -p credit and is intentionally NOT done here by
+        # default; add a separate workflow step or job with --live when desired.
+        run: |
+          FAIL=0
+          for fixture_dir in plugins/forge/tests/fixtures/*/; do
+            fixture_name="$(basename "$fixture_dir")"
+            printf '=== Fixture: %s ===\n' "$fixture_name"
+            if bash "${fixture_dir}run-fixture.sh" --result-dir "$fixture_dir"; then
+              printf 'PASS  %s\n\n' "$fixture_name"
+            else
+              EXIT=$?
+              if [ "$EXIT" -eq 2 ]; then
+                printf 'SKIP  %s  (no result dir / pre-baked output; run with --live for full test)\n\n' "$fixture_name"
+              else
+                printf 'FAIL  %s\n\n' "$fixture_name"
+                FAIL=$((FAIL + 1))
+              fi
+            fi
+          done
+          exit $FAIL

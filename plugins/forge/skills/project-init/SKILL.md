@@ -30,6 +30,7 @@ When the flow completes (full mode), the project has:
 9. Linear project + P0/P1 epics — only if step 2.6 = `linear` and step 2.7 = Yes.
 10. `.claude/e2e-*.json` — per-platform e2e opt-in / opt-out markers, written by `forge:e2e --init` (step 7.6).
 11. Design posture — recorded by `forge:design-bootstrap` (step 7.7) when a frontend platform is present: one of a `design` block in `tracker.json`, a `## Design` block in CLAUDE.md, or a `design/` stub plus a parking-lot epic.
+12. `.claude/api-docs.json` — API docs opt-in marker, written by `forge:update-docs-api --init` (step 7.8) when a backend platform is present: `{ "openapi": true }` or `{ "openapi": false }`.
 
 `--tracker-only` mode produces only item 4 (and stops).
 
@@ -200,6 +201,12 @@ Invoke `forge:e2e --init`. It walks `platforms[]` from the now-written `tracker.
 > Skip entirely if `--tracker-only` was passed, or if no `platforms[]` entry is a frontend stack (web-frontend / mobile-flutter / mobile-native).
 
 Invoke `forge:design-bootstrap`, passing any Figma URL / tokens answer captured during the stack interview (step 2.1 question 6) so its branch (a) does not re-ask. The skill records exactly one outcome per its own contract: a `design` block in `tracker.json`, a `## Design` block in CLAUDE.md, or a `design/` stub plus a parking-lot epic via `forge:create-epic`. Placed here — after CLAUDE.md (step 5 / 4.5) and `tracker.json` (step 7.25) both exist — so every branch has the artifact it writes to.
+
+### 7.8. API docs opt-in (backend platforms only)
+
+> Skip entirely if `--tracker-only` was passed, or if no `platforms[]` entry is a backend stack (backend-node / backend-nest / any backend framework).
+
+Invoke `forge:update-docs-api --init`. It asks the user once whether to generate API docs from Swagger/OpenAPI or hand-write Markdown, then writes `.claude/api-docs.json` so the question is never re-asked. project-init does not ask the API docs question itself — `forge:update-docs-api --init` owns the prompt and marker write.
 
 ### 8. Output
 
