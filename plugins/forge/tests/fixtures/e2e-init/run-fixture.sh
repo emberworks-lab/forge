@@ -226,13 +226,24 @@ PROMPT
 
   LOG_FILE="${SCRATCH_DIR}/claude-output.json"
 
-  timeout 600 claude \
-    -p "$(cat "$PROMPT_FILE")" \
-    --plugin-dir "$FORGE_PLUGIN_DIR" \
-    --dangerously-skip-permissions \
-    --max-turns 20 \
-    --output-format stream-json \
-    > "$LOG_FILE" 2>&1 || true
+  # Run the skill headless INSIDE the scratch repo (see project-init fixture for
+  # the full rationale): cd into SCRATCH_DIR so forge:e2e --init writes markers in
+  # the scratch repo, not the real tree; --verbose for stream-json; portable timeout.
+  CLAUDE_ARGS=(
+    -p "$(cat "$PROMPT_FILE")"
+    --plugin-dir "$FORGE_PLUGIN_DIR"
+    --dangerously-skip-permissions
+    --max-turns 20
+    --output-format stream-json
+    --verbose
+  )
+  if command -v timeout >/dev/null 2>&1; then
+    ( cd "$SCRATCH_DIR" && timeout 600 claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+  elif command -v gtimeout >/dev/null 2>&1; then
+    ( cd "$SCRATCH_DIR" && gtimeout 600 claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+  else
+    ( cd "$SCRATCH_DIR" && claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+  fi
 
   printf 'Claude run complete. Log: %s\n\n' "$LOG_FILE"
 

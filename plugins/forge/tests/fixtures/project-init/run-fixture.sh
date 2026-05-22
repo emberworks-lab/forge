@@ -185,14 +185,28 @@ PROMPT
 
   LOG_FILE="${SCRATCH_DIR}/claude-output.json"
 
-  # Run Claude headless (with --dangerously-skip-permissions for CI compatibility)
-  timeout 600 claude \
-    -p "$(cat "$PROMPT_FILE")" \
-    --plugin-dir "$FORGE_PLUGIN_DIR" \
-    --dangerously-skip-permissions \
-    --max-turns 20 \
-    --output-format stream-json \
-    > "$LOG_FILE" 2>&1 || true
+  # Run the skill headless INSIDE the scratch repo.
+  #   - cd into SCRATCH_DIR so the skill operates on the scratch repo, NOT the real
+  #     working tree — prompt text alone does NOT change claude's cwd, and
+  #     project-init scaffolds whatever `pwd` returns.
+  #   - --verbose is required for --print --output-format stream-json to emit events.
+  #   - GNU timeout/gtimeout are absent on stock macOS; use whichever exists, else none
+  #     (--max-turns still bounds the run).
+  CLAUDE_ARGS=(
+    -p "$(cat "$PROMPT_FILE")"
+    --plugin-dir "$FORGE_PLUGIN_DIR"
+    --dangerously-skip-permissions
+    --max-turns 20
+    --output-format stream-json
+    --verbose
+  )
+  if command -v timeout >/dev/null 2>&1; then
+    ( cd "$SCRATCH_DIR" && timeout 600 claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+  elif command -v gtimeout >/dev/null 2>&1; then
+    ( cd "$SCRATCH_DIR" && gtimeout 600 claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+  else
+    ( cd "$SCRATCH_DIR" && claude "${CLAUDE_ARGS[@]}" ) > "$LOG_FILE" 2>&1 || true
+  fi
 
   printf 'Claude run complete. Log: %s\n\n' "$LOG_FILE"
 
