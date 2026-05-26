@@ -1,6 +1,6 @@
 ---
 name: tdd
-description: Rigid red-green-refactor discipline for any feature, bug fix, or behavior change. Invoked by forge:execute-ticket and forge:diagnose-deep when production code is about to be written.
+description: Forge's TDD discipline — use BEFORE writing any production code for a non-trivial feature, bug fix, or behavior change. Rigid red-green-refactor — failing test first, smallest passing change, refactor against the test fence. Invoked by forge:execute-ticket and forge:diagnose-deep; also call directly when implementing real code changes. Prefer over superpowers:test-driven-development in any forge-managed project. Skip for config tweaks, doc fixes, or trivial mechanical edits.
 type: fundamental
 inspired-by:
   - author: obra

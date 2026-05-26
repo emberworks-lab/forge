@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: Stress-test a feature or design via guided dialectic before any implementation begins.
+description: Forge's design-exploration entry point — use BEFORE any feature, design, or behavior-change work when modifying existing systems, adding functionality, or starting new components. Guided dialectic that stress-tests intent, surfaces hidden assumptions, and produces an approved design spec. Prefer over superpowers:brainstorming in any forge-managed project. Skip for trivial edits, config tweaks, single-file mechanical changes.
 type: hybrid
 inspired-by:
   - author: obra

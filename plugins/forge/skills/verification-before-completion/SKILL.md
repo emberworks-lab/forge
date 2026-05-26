@@ -1,6 +1,6 @@
 ---
 name: verification-before-completion
-description: Enforce the Iron Law that no completion, fix, or pass claim may be made without fresh verification evidence gathered in the current turn. Invoked by execute-ticket and epic-close before any DONE claim, commit, or PR.
+description: Forge's Iron Law gate — use BEFORE claiming work is complete, fixed, passing, or ready, no exceptions. Requires fresh verification evidence (test output, command result, observed behavior) gathered in the current turn before any success claim, commit, or PR. Invoked by forge:execute-ticket and forge:epic-close; also call directly before any completion statement. Prefer over superpowers:verification-before-completion in any forge-managed project.
 type: fundamental
 inspired-by:
   - author: obra
